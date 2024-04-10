@@ -1,0 +1,1480 @@
+So now let's talk about
+
+what is an auto scaling group.
+
+So when we deploy a website or an application,
+
+the load can change over time because we may have
+
+more users visiting our websites over time.
+
+And we've seen that in the cloud, in AWS,
+
+it's possible for us to create
+
+and also get rid of servers very quickly
+
+with the EC2 instance creation API call.
+
+So, if you wanna automate this,
+
+we can create an auto-scaling group.
+
+So the goal of the ASG is to scale out,
+
+that means add EC2 instances and you need to remember this,
+
+scale out to match an increased load
+
+or to scale in that means removing EC2 instances
+
+to match a decreased load.
+
+And so therefore the size of our ASG
+
+is going to vary over time.
+
+Overall, we can also define parameters
+
+to ensure we'll have a minimum
+
+and a maximum number of EC2 instances running at any time
+
+in our ASG.
+
+ASG also have the superpower
+
+that if you are pairing it with a load balancer,
+
+then any EC2 instances as part of the ASG
+
+will be linked to the load balancer.
+
+Another superpower is that
+
+if one instance is deemed unhealthy, it is terminated
+
+and a new EC2 instance is created to replace it.
+
+So, auto scaling groups are free
+
+and you're only going to pay
+
+for whatever resources are created underneath
+
+such as your EC2 instances.
+
+So let's see how an ESG works in AWS.
+
+So we set a minimum capacity,
+
+which is how many instances you want at minimum in your ASG.
+
+For example, two.
+
+Then you set a desired capacity,
+
+which is how many instances you want in your ASG,
+
+for example, four and then you set a maximum capacity
+
+which is how many instances
+
+at a maximum do I want in my ASG.
+
+And then that means that if you move the desire capacity
+
+to higher number,
+
+but that's still less than a maximum capacity,
+
+then you can scale out as needed.
+
+That means scale out means adding EC2 instances
+
+and so therefore your ASG can grow bigger
+
+and bigger and bigger.
+
+In this instance, the maximum capacity is seven.
+
+As I said, the ASG also works with a load balancer.
+
+So if we have four instances registered in our ASG,
+
+then the ELB is going to distribute traffic
+
+to all these instances right away
+
+and so your users can access a load balanced website.
+
+But the ELB also has the ability
+
+to check for the health of your EC2 instances
+
+using the health check
+
+and that health check can be passed on to the ASG.
+
+That means that the ASG can terminate EC2 instances
+
+if they are deemed unhealthy by the load balancer,
+
+which is very handy.
+
+Also, if you scale out, that means if you add EC2 instances,
+
+then of course the ELB is going to send traffic
+
+to them as well and spread the load.
+
+Therefore, it's a really great combination
+
+to use a load balancer and an auto scaling group.
+
+Now, in terms of attributes to create your ASG,
+
+you need to create a launch template.
+
+There used to be a thing called launch configurations
+
+but it's deprecated, but the idea is the same.
+
+A launch template contains information
+
+on how to launch EC2 instances within your ASG.
+
+So you have information about the AMI
+
+and the instance type, the EC2 user data,
+
+the EBS volumes, security groups, SSH key pair,
+
+IAM roles for your EC2 instances,
+
+network and subnet information
+
+as well as load balancer information and more if you want.
+
+And so all these parameters look a lot like
+
+the ones we specified when we created an EC2 instance.
+
+On top of it, your ASG has a min size,
+
+a max size and an initial capacity we need to define
+
+as well as scaling policies.
+
+Talking about scaling policies,
+
+let's see how CloudWatch alarm integrates with auto scaling.
+
+So you don't know what CloudWatch is yet of course,
+
+but let me just tell you a little bit about it right now.
+
+So it's possible to scale in and out,
+
+an ASG based on CloudWatch alarms.
+
+So for example, we have an ASG right here
+
+with three EC2 instances
+
+and the alarm is going to be triggered
+
+and therefore we're going to get a scale out activity.
+
+So what would trigger an alarm?
+
+Well, it's a metric you can return, for example,
+
+for the average CPU or any custom metric you want.
+
+So for example, if the average CPU
+
+as a whole for your ASG is too high,
+
+then you need to add EC2 instances
+
+and therefore the alarm is going to be triggered
+
+and is going to trigger a scaling activity
+
+in your auto scaling group
+
+and this is why it's called an auto scaling group
+
+because paired with alarms,
+
+there is an automatic aspect of scaling behind the scenes.
+
+So based on the alarm, we can create scale out policies.
+
+That means increasing the number of instances
+
+or we can create scale in policies
+
+to decrease the number of instances.
+
+And all these things together are what composes ASG.
+
+I hope you liked it and I will see you in the next lecture.
+
+Okay, so let's practice
+
+using Auto Scaling groups.
+
+To do so, first of all,
+
+please make sure to take your instances
+
+and terminate them all
+
+to have zero instances running in EC2.
+
+Okay, so next we have to create
+
+an Auto Scaling group.
+
+So let's go into Auto Scaling groups
+
+on the left hand side,
+
+and we're going to create
+
+our first Auto Scaling group.
+
+So create Auto Scaling group,
+
+let's name our Auto Scaling group DemoASG,
+
+and we need to refer to a launch template,
+
+so I'm going to create a launch template right now.
+
+So when you create a launch template
+
+you need to give it a name,
+
+I will give it MyDemoTemplate,
+
+as well as a description,
+
+Template.
+
+Okay, so we're going to scroll down
+
+and specify different options.
+
+So for the Amazon Machine Image I'm going to use,
+
+I'm going to go into Quick Start,
+
+Amazon Linux,
+
+I would choose Amazon Linux 2,
+
+in the version x86.
+
+Okay, and we'll use a free tier eligible AMI,
+
+so that's good.
+
+Next for Instance type,
+
+I'm going to select t2.micro
+
+because it is free tier eligible,
+
+so anything free tier eligible is good.
+
+And I will scroll down in terms of Key pair,
+
+I will include EC2 Tutorial,
+
+so this is defining pretty much
+
+how EC2 instances within my launch template
+
+and therefore within my ASG,
+
+should be launched.
+
+Okay, so the options are very similar
+
+to the ones you've seen
+
+when you launch an EC2 instance on its own.
+
+For subnets you don't include it
+
+in the launch templates.
+
+For Firewall security group
+
+you can select an existing one,
+
+for example, your launch-wizard-1.
+
+You have 8 gigabytes of gp2 volume,
+
+this is good.
+
+And then for Advanced details,
+
+I'm going to scroll all the way down,
+
+and I will find my User data,
+
+and for User data I'm going to input
+
+the user data we used from before,
+
+so all of it,
+
+and this is going to allow a web server
+
+to be created on every EC2 instance
+
+as part of this ASG.
+
+So we're good to go,
+
+let's create this launch template,
+
+it has been created,
+
+called the MyDemoTemplate.
+
+I'm going to refresh it
+
+and select it right here.
+
+So we have MyDemoTemplate Version 1.
+
+We have the summary of it,
+
+and we click on next to keep on going.
+
+So we choose the instance launch options,
+
+we have a VPC,
+
+which is default VPC,
+
+as well as the ability
+
+to launch into three different subnets,
+
+so eu-west-1a, 1b, and 1c.
+
+Instance requirements.
+
+So we have those provided by the templates
+
+which is a t2.micro,
+
+but we could, if we wanted to,
+
+override them, okay?
+
+And when you override them
+
+you can specify instant attributes
+
+or manually add instance types.
+
+And you can have a mix of on demand
+
+and spot instances,
+
+as well as a mix of different instance types.
+
+So this is definitely more advanced,
+
+but for now we'll just keep it
+
+as the instance type requirements
+
+from the Launch template,
+
+so we'll have it as t2.micro only.
+
+Let's click on Next.
+
+Then we can configure advanced options,
+
+so Load balancing is optional,
+
+so we can create an ASG
+
+without a load balancer,
+
+and there are a few use cases for that, okay?
+
+But we already have an load balancer,
+
+so we're going to Attach to an existing load balancer
+
+and it will choose my-first-target-group
+
+from my DemoALB application balancer.
+
+So that the EC2 instances launched
+
+as part of this ASG are linked
+
+to my application load balancer directly.
+
+For Health checks this is optional,
+
+but again we have two kinds of health checks,
+
+the first is the EC2 health check.
+
+So if my EC2 instance fails
+
+is going to be removed automatically
+
+from my Auto Scaling group,
+
+and we can also have an ELB type
+
+of health check enabled,
+
+and we'll leave it enabled.
+
+So that if the ELB deems
+
+that an instance is unhealthy,
+
+then the ASG will terminate it automatically.
+
+Okay, we will not enable any additional settings.
+
+Click on Next.
+
+So this is where you set your ASG Group size.
+
+So Desired capacity is 1
+
+Minimum capacity is 1,
+
+and Maximum capacity is 1,
+
+so that means that we have one instance
+
+within the ASG,
+
+but if we could specify 10 as max capacity,
+
+which would allow us to have a varying size
+
+of the capacity of the ASG between 1 and 10.
+
+But I'll keep everything as 1 right now.
+
+Scaling policies for now I will keep it as None,
+
+but we'll have a look at them
+
+in details later on.
+
+Let's click on Next.
+
+No notifications,
+
+no tags,
+
+we review everything,
+
+and then we click on Create Auto Scaling Group.
+
+Okay, so my Auto Scaling Group is created,
+
+and what is going to do is
+
+that it's going to create
+
+one EC2 instance for me.
+
+So the idea here is that if I click
+
+on my Auto Scouting Group,
+
+and we get some details,
+
+we can see the desired min and max capacity,
+
+as well as the Launch template
+
+that was used for this ASG.
+
+And then if I go into Activity
+
+this is where the interesting stuff happens.
+
+So when the ASG will decide
+
+to create an EC2 instance,
+
+it's going to appear in the Activity notifications,
+
+so if I refresh this, very soon,
+
+sorry, in the Activity history.
+
+So if I refresh the Activity history,
+
+then I can see that there is
+
+a Launching a new instance right here,
+
+because the Auto Scaling group
+
+has a capacity of 0,
+
+and we wanted 1 capacity,
+
+so it's just increasing the number
+
+of EC2 instances in our ASG,
+
+to match the desired capacity.
+
+So if I go to the tab Instance Management,
+
+as we can see,
+
+one EC2 instance was created by the ASG.
+
+And so if we go to the Instances tab right here,
+
+we can see that the EC2 instance
+
+is currently Running and initializing.
+
+So it's pretty cool.
+
+Now the cool thing is that
+
+because we had set up our ASG
+
+to be linked to our Target Groups,
+
+then if we go to the Target Groups
+
+on the left hand side,
+
+and find my-first-target-group,
+
+and go to Targets,
+
+my EC2 instance is being,
+
+and I will just expand it,
+
+my EC2 instance is being registered
+
+into my ALB.
+
+So right now it is shows that
+
+as unhealthy because the object are failing,
+
+because the EC2 instance is still bootstrapping.
+
+But if after a bit it passes,
+
+it will be shown as healthy,
+
+and then will be registered into my ALB.
+
+So let me pause the video to wait for that.
+
+Okay, so my instance is now healthy,
+
+and then if I go to my ALB and refresh,
+
+I get the Hello World response,
+
+that means that everything is functioning,
+
+the instance was created by an ESG.
+
+We can see it in the EC2 console,
+
+it was registered into the target group
+
+which is linked to our load balancer,
+
+and therefore our load balancer is fully working.
+
+Now, if the instance never gets healthy
+
+it gets unhealthy,
+
+then because we set up our ASG
+
+to terminate unhealthy instances,
+
+what you're going to see is
+
+that the instance is going to be terminated,
+
+and a new one will be created.
+
+So you will see this mostly
+
+in the Activity history.
+
+If you do have this,
+
+the reason why this is happening
+
+is that your EC2 instance is misconfigured.
+
+This could be either a security group issue
+
+or it could be an EC2 user data script issue.
+
+So please check those
+
+before asking questions in the Q&A.
+
+Okay, but these are the errors
+
+that you should be having.
+
+So now we have one EC2 instance
+
+and it's in service.
+
+And what we could do
+
+is that we can experience the scaling
+
+by editing the Auto Scaling group size.
+
+So we want two instances,
+
+and so we have to increase
+
+the maximum capacity as well.
+
+So we'll update this.
+
+And now what we told the ASG
+
+is that we want you to create one
+
+or more EC2 instance for us.
+
+So if you go to the Activity history
+
+and then refresh it,
+
+very soon is going to show a new activity
+
+that it will be trying to be launching
+
+an EC2 instance.
+
+So here we go,
+
+now it says Launching a new EC2 instance,
+
+because you have changed the desire capacity
+
+from 1 to 2,
+
+and the actual number of instances
+
+in our a ASG was only one.
+
+So now, as you can see,
+
+we have a second EC2 instance being created,
+
+and after a while is going to be registered
+
+into our target group and added.
+
+So I will pause the video
+
+for this process to happen.
+
+Okay, so my instance is now healthy.
+
+And so if I go to my ALB and refresh,
+
+as we can see I got my two IPs
+
+that are looping through my ALB.
+
+So everything is working great.
+
+And so one last thing,
+
+so if we go to activities,
+
+we can see the two instances
+
+were launched successfully.
+
+Now let's go through the opposite,
+
+we're going to scale down our capacity
+
+by putting the Desired capacity back to 1,
+
+and update it,
+
+and what this will do
+
+is that it will say,
+
+"hey, it looks like you have two instances,
+
+but now you need only one,
+
+so I'm going to pick one
+
+of these two instances right here
+
+and terminate them."
+
+So as you can see here,
+
+it says, "I'm terminating one of these instances
+
+because of the change of the configuration
+
+of the ASG,"
+
+and is going to terminate the instance
+
+and then deregister it from the target group.
+
+And then we'll be back
+
+with only one EC2 instance in our ASG.
+
+So that's it for the lecture,
+
+you've seen the whole power of ASG,
+
+and I will see you in the next lecture
+
+to talk about Automatic scaling.
+
+So we have several scaling policies
+
+for auto scaling group.
+
+The first one is dynamic scaling and within this category,
+
+we have the target tracking scaling,
+
+which is very simple to set up.
+
+The idea is that you define a metric for your ASG,
+
+for example, the CPU utilization
+
+and you define a target value, for example, 40%.
+
+And automatically, the ASG is going to scale out or in
+
+to allow you to keep this metric to around 40%.
+
+We also have the simple or step scaling
+
+and the idea is that you define CloudWatch alarms
+
+that are being triggered when you want to add units
+
+of capacity to your auto scaling group
+
+or when you want to remove units of capacity
+
+to your auto scaling group.
+
+Then we have scheduled scaling.
+
+So this is when you anticipate a scaling
+
+based on a known usage pattern.
+
+For example, you say that you know that every time
+
+at 5:00 PM on Fridays, you're going to get new users
+
+and therefore, you want to increase
+
+the minimum capacity to 10.
+
+Then we have predictive scaling.
+
+So this is when you continuously forecast load
+
+and then you start scheduling ahead of time.
+
+So this is very good when you have patterns
+
+that repeat themselves.
+
+So automatically, the ASG is going to analyze
+
+historical load then generate a forecast
+
+and then schedule scaling actions based on the forecast,
+
+which can be very handy if you have cyclical data.
+
+So some good metrics to scale on is a big question.
+
+So it depends really on what your application is doing
+
+and how it's working.
+
+But usually, here are a few.
+
+So number one is CPU utilization,
+
+because every time your instance receive a request,
+
+usually, they will do some sort of computation
+
+and so it will use some CPU.
+
+And so if you look at the average CPU utilization
+
+across all your instances and it goes higher,
+
+that means that your instances are being more utilized.
+
+And so it would be a good metric to scale on.
+
+Another metric to scale on, it's more application-specific,
+
+but it is a RequestCountPerTarget,
+
+which is based on your testing,
+
+you know that your EC2 instances operate
+
+at an optimal request of 1,000 requests
+
+per target at a time and so maybe this is the target
+
+you want to have for your scaling.
+
+So here as an example.
+
+You have an auto scaling group with three EC2 instances
+
+and your ALB is currently spreading the request
+
+across all of them.
+
+So right now the value of the request counts
+
+per target metric is three,
+
+because each EC2 instance, on average,
+
+has three requests outstanding.
+
+Next if your application is network-bound,
+
+so for example there's a lot of uploads and downloads
+
+and you know that network is going to be a bottleneck
+
+for your EC2 instances,
+
+then you may want to scale on the average network in or out
+
+to make sure that if you reach some certain threshold,
+
+then you're going to scale based on that.
+
+Or any custom metric that you push to CloudWatch,
+
+so you can set up your own metrics
+
+that are going to be application-specific
+
+and based on that, you can set up your scaling policies.
+
+Now one last thing you need to know about scaling policies
+
+is what's called a scaling cooldown.
+
+So the idea is that after there is a scaling activity,
+
+so whenever you add or you remove instances,
+
+you are entering the cooldown period,
+
+which is, by default, five minutes or 300 seconds.
+
+And during that cooldown period,
+
+the ASG will not launch or terminate additional instances.
+
+And the reason behind this reasoning
+
+is that you allow for metrics to stabilize,
+
+for your new instance to enter into effect
+
+and to see what the new metric will become.
+
+So the idea is that when there is a scaling action
+
+that occurs, the question is,
+
+is there a default cooldown in effect?
+
+If yes, then ignore the action.
+
+If no, then proceed with the scaling action,
+
+which is to launch or terminate instances.
+
+And so an advice to you is to use a ready-to-use AMI
+
+to reduce the configuration time for your EC2 instances
+
+in order for them to be serving the request faster.
+
+So if you don't spend time configuring your EC2 instance,
+
+then they can be in effect right away.
+
+And then because they can be active way faster,
+
+then the cooldown period can be decreased
+
+and you can have a more dynamic scaling up and down
+
+of your ASG.
+
+And of course, you need to make sure to enable
+
+something like detailed monitoring for your ASG
+
+to get access to metrics every one minute
+
+and to make sure that you have
+
+these metrics being updated fast enough.
+
+So that's it for this lecture.
+
+I hope you liked it and I will see you in the next lecture.
+
+Okay, so now let's have a look
+
+at automatic scaling for your ASG.
+
+As you can see we have three categories,
+
+dynamic scaling policies, predictive scaling policies,
+
+and scheduled actions.
+
+So let's start with the simplest.
+
+So schedule actions
+
+is when you want to schedule a scaling action in the future,
+
+so you can create one
+
+and then you say what you want the desired capacity
+
+or the min or the max to be,
+
+and then is it once every week, every hour,
+
+is it's based on a specific schedule and so on?
+
+And then a start time and an end time
+
+if you wanted it to be done.
+
+So this is pretty cool and this is allowing you to schedule
+
+based on events that you can predict
+
+and that you know in advance.
+
+Because you know, for example
+
+that you're going to run a big promotion next Saturday.
+
+Next, predictive scaling policies
+
+is where it's going to be machine learning driven.
+
+So you need to scale it based on a forecast.
+
+So you need to have a look at the actual policy
+
+and the actual scaling based on the past
+
+and then it will have a look at a metric to look at.
+
+For example, CPU utilization or network in, network out,
+
+the application load balancer request counts
+
+or a custom metric that you want.
+
+And then you want to, for example,
+
+to have a target of 50% of CPU utilization for instance,
+
+and then you can set up some additional settings,
+
+but based on this,
+
+and based on the actual scheduled utilization
+
+for the past week, for example,
+
+then a forecast is going to be created
+
+and your ASG is going to be scaling based on that forecast.
+
+So it's not something I can demonstrate with you
+
+because I would need to enable this
+
+for a very long time a week
+
+and then make sure I have some usage on my application.
+
+But at least you see that predictive scaling policy
+
+is quite simple to set up,
+
+you just specify the metric you want
+
+and the target utilization,
+
+and then some machine learning will be applied
+
+for the scaling to happen.
+
+So the one policy I can demonstrate to you
+
+is the dynamic scaling policy.
+
+So let's go ahead and create a dynamic scaling policy.
+
+So here we have three options.
+
+We have target tracking, step scaling and simple scaling.
+
+So let's have a look at simple scaling first.
+
+So here we have to specify a name than a CloudWatch alarm,
+
+which is an alarm that can scale capacity
+
+whenever it is being triggered.
+
+So we need to create an alarm beforehand,
+
+but we'll see this later on.
+
+And so in case the alarm is being triggered
+
+and what happens, maybe you want to add two capacity units,
+
+or maybe you want to add 10% of your group.
+
+And then add capacity units
+
+in increments of at least two capacity units.
+
+So this is a simple scaling policy.
+
+So we can have a scaling policy that goes out
+
+by adding instances,
+
+or that goes in by removing instances here.
+
+Or you can have a set to action as well.
+
+And next we have step scaling.
+
+So this is allowing you to set up multiple an alarm
+
+and based on the alarm value to have different steps
+
+to, for example, if the alarm is very, very high
+
+in terms of the value, then add 10 capacity units.
+
+But if it's high, but not too high, add one.
+
+This is the idea behind step scaling,
+
+but we'll set up a target tracking scaling policy
+
+because this is going to create a CloudWatch alarms for us.
+
+So here's the name target tracking policy
+
+and it will track the average CPU utilization
+
+of a target value of 40,
+
+and then I will go ahead and create my policy.
+
+So now what we're saying is that, hey,
+
+the goal of this ASG
+
+is to maintain the CPU utilization to 40.
+
+And in case, then you go over,
+
+then please add capacity units.
+
+So to see this in action, we need to change a few things.
+
+So right now the main end of the desired
+
+is one which is good, but let's set the max capacity
+
+to be three or two whatever happens.
+
+The idea is that you want to give it a maximum
+
+that is greater than the minimum
+
+so that the capacity can go from one to two
+
+and then to three.
+
+And so the idea now is that we want the CPU utilization
+
+of my autoscaling group to be at a target value of 40.
+
+So if you have a look right now at the CPU utilization
+
+is going to be zero, obviously.
+
+So let's have a look at EC2
+
+is going to be close to zero because,
+
+well, my EC2 instance is not doing anything.
+
+So what I want to do is to go to my EC2 instance,
+
+and I'm going to stress it to make the CPU utilization
+
+skyrocket to 100%.
+
+So I'm going to connect to my EC2 instance,
+
+using EC2 instance connect, and then connect to it
+
+and then I'll Google install stress Amazon Linux 2.
+
+Cause there's a few commands and here is the commands,
+
+so I'll copy the first command in here,
+
+and then I'll copy the second command to install stress.
+
+Here we go.
+
+So stress is installed.
+
+And then I just run the command stress -C 4
+
+and this is going to make the CPU go to 100%
+
+by leveraging four CPU units by making four VCPUs
+
+being used at a time.
+
+So this should make my CPU go to 100%
+
+and so what's going to happen is that
+
+in my monitoring of my ASG in here,
+
+what I wanted to happen is to go see the CPU tradition
+
+to go to something very, very, very high.
+
+And then in activities, I want to see a scaling action.
+
+And so that means that I will go from one instance
+
+to two instances.
+
+So what I'm going to do is just pause the video until,
+
+well, enough metrics are being captured
+
+and until we can see that the CPU utilization
+
+is at a very high value
+
+and then we'll see how the target tracking policy works.
+
+So now I went into activity and under Activity history,
+
+it says that's a alarm has been triggered
+
+and due to the target driving policy,
+
+then the capacity went from one instance to two instances.
+
+So if I go into instance management,
+
+as you can see, now I have two EC2 instances
+
+due to the scaling.
+
+And if I go into monitoring
+
+and look at the EC2 level monitoring,
+
+as we can see the CPU utilization went to a very high value
+
+and then four scaling happens.
+
+So how do we know that the scaling happens?
+
+So if you're going to Automatic scaling, as you can see,
+
+there is a target tracking policy right here.
+
+And what I want to show you is the backend.
+
+So if we go into the CloudWatch service in here
+
+and go into CloudWatch,
+
+at the left hand side, I want to go into Alarms.
+
+So we need to go into alarms.
+
+As you can see, two alarms are created directly
+
+by the target tracking policy.
+
+And one of them is called AlarmHigh, which is to scale out,
+
+so add instances.
+
+And one of them is called AlarmLow,
+
+which is to scale in so less instances.
+
+And so this one is looking at if the CPU utilization
+
+is more than 40% for three to the points
+
+within three minutes, then go into the alarm states.
+
+And this one is looking at if CPU utilization
+
+is less than 20 eights for 15 data points, then scale in.
+
+So this is the idea.
+
+So this one was in alarm
+
+and so due to the metric itself, going into the alarm state,
+
+by having the CPU utilization
+
+going over that limit right here,
+
+well, it got triggered
+
+and this made a scaling activity happen
+
+from my autoscaling group,
+
+which in turn made a new instance being in service.
+
+And so now if I go here and I stop this command
+
+and I'm not even sure that I can stop it,
+
+but if I stop this command or let me just finish it
+
+and to stop this command,
+
+I can probably go to my EC2 instances and reboot it.
+
+So I'm going to have a look at this one, I believe,
+
+and I'm going to reboot it.
+
+So reboot this instance,
+
+and I'm going to also reboot that one just in case.
+
+So this should make my CPU utilization go back to zero
+
+and this would trigger a scale in action within 15 minutes.
+
+So I'm going to yet again, pause the video in my ASG
+
+and see if by any chance within the activity,
+
+I see a scale in action happening.
+
+So I will pause right now
+
+and actually just because I wasn't quick enough
+
+because the CPU still was high,
+
+then the desired capacity went from two to three.
+
+So as we can see yet another instance has been added.
+
+So this really shows the power of autoscaling group
+
+and now if I go into instance managements,
+
+we'll have three EC2 instances,
+
+and I'm going to have to wait a little while
+
+until they're being terminated.
+
+So now let's go back into activity and as you can see,
+
+more activities have been going on.
+
+So some instances have been terminated.
+
+So because the alarm went from the lower CPU
+
+and then the capacity was set from three to two
+
+and then one more time from two to one.
+
+And so if you go into your instance management,
+
+as you can see, one instance was already terminated
+
+and the other one is in the terminating phase,
+
+as that means that's your target tracking policy is working.
+
+And you can see this by going into this alarm right here.
+
+And as you can see, the CPU utilization went up
+
+and then it went down
+
+and then as soon it's past this 28% threshold,
+
+then it went to do the alarm state,
+
+which means that your ASG we'll start removing instances.
+
+So that really shows the power of target tracking policies.
+
+When you're done, please make sure to delete this policy
+
+and you'll be good to go for the cleanup.
+
+That's it, I will see you in the next lecture.
+
+So now let's talk about a very handy feature
+
+of Auto Scaling groups called Instance Refresh.
+
+So the idea is that you want to update
+
+an entire Auto Scaling group
+
+thanks to a new launch template that you've created.
+
+And so you wanna re-create all EC2 instances.
+
+For this, you can, instead of terminating an instance
+
+and waiting for it to come back,
+
+you can use the native feature of Auto Scaling groups
+
+called Instance Refresh.
+
+So let's take an example.
+
+Say we have an Auto Scaling group
+
+and the EC2 instances have been launched
+
+with an old launch template.
+
+I say old because we are creating a new launch template.
+
+For example, we updated the underlying AMI
+
+of our EC2 instances,
+
+and then we're going to the API call
+
+named Start Instance Refresh.
+
+So what's going to happen is
+
+that we're going to set a minimum healthy percentage,
+
+for example, 60%,
+
+and that tells our Auto Scaling group
+
+how many instances can be deleted over time.
+
+And then as instances are terminated,
+
+then new ones are coming up with the new launch template.
+
+That's why it's called an EC2 Instance Refresh,
+
+is because instances are being terminated
+
+and new ones come up.
+
+And over time, all instances having the old launch template
+
+will be terminated and the new ones will come up.
+
+So on top of it, to make sure that your EC2 instances
+
+have enough time to be ready and to serve traffic,
+
+you can specify a warm-up time,
+
+which is to say how long to wait until we can assume
+
+that the new EC2 instance is ready to use.
+
+Okay? So that's it for this lecture.
+
+I hope you liked it and I will see you in the next lecture.
+
