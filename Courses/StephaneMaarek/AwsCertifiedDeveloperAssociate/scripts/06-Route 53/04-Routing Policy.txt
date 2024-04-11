@@ -1,0 +1,2465 @@
+# Simple.
+
+So now let's talk about routing policies
+
+for Route 53.
+
+So a routing policy is helping Route 53
+
+respond to DNS queries,
+
+and we shouldn't be confused about the word routing.
+
+This is not like when you have a load balancer and the
+
+actual load balancer will route traffic
+
+to the backend EC2 instances.
+
+No, no, no.
+
+This routing is from a DNS perspective.
+
+So the DNS does not respond, does not route any traffic.
+
+So the traffic doesn't go through the DNS.
+
+The DNS only will respond to the DNS queries
+
+and then the clients will know to which way
+
+they should be doing these HTTP queries, for example.
+
+So the DNS just helps translate host names
+
+into actual endpoints that the clients can use.
+
+So Route 53 will support the following routing policy.
+
+There's simple, weighted, failover, latency based,
+
+geolocation, multi-value answer, and geoproximity.
+
+And we're going to have a look at all of them
+
+in this section.
+
+So the first one is going to be the simple routing policy.
+
+And the idea is that with this,
+
+that we've actually been using before,
+
+we're going to route traffic to a single resource typically.
+
+So here's an example.
+
+The clients that will say, hey,
+
+I want to go to foo.example.com,
+
+and Routes 53 will say, hey,
+
+go to this IP address.
+
+And this is an A record.
+
+So it is possible for us to specify multiple values
+
+in the same record.
+
+And if so, if multiple values are returned by the DNS,
+
+then a random one will be chosen by the clients
+
+or client side.
+
+So in this example,
+
+we have the client's asking again for foo.example.com,
+
+and Amazon Route 53 will just reply with three IP addresses
+
+that occur embedded into the A record.
+
+And then the clients will pick one of them randomly
+
+and apply it for the routing.
+
+So if you have enabled an alias record alongside
+
+the simple policy,
+
+then you can only specify on AWS resource as a target.
+
+And finally, it's called simple because it's very simple.
+
+And therefore you can not associate this with health checks
+
+and we'll see health checks later on in this section
+
+and how they work.
+
+So let's go in the console to see how a routing policy
+
+of step simple can be created.
+
+So let's create a record, and the record name is going to be
+
+simple.stephanetheteacher.com.
+
+It's an A record, and the value of which is going to be,
+
+for example, my instance in ap-southeast-1.
+
+Now for TTL, it will say something very low,
+
+like 20 seconds.
+
+And the routing policy is going to be here.
+
+So as you can see, we have different possibilities,
+
+six of them, and then one other that is
+
+somewhere else in the UI.
+
+So we have a TTL 20 seconds as simple writing policy,
+
+and let's just create this record.
+
+So we've been doing this before.
+
+We know how this works.
+
+So now if we go to simple.stephanetheteacher.com.
+
+And go to this URL, we get
+
+Hello World from my instance in ap-southeast-1b,
+
+which is awesome.
+
+And if we do a dig command and have a look,
+
+so we need to reinstall dig.
+
+So sudo yum install bind-utils.
+
+So this is because I restarted my machine here.
+
+Okay, we're going to redo the dig command.
+
+So we do the dig command on this.
+
+As we can see, we have an A record of a TTL of 20 seconds
+
+pointing to this IP.
+
+But we can change this record now.
+
+We're going to edit the record.
+
+So I will just simply click on it and edit the record.
+
+And for the value, now, I can enter multiple IPs.
+
+So I can insert my one in ap-southeast-1
+
+or one in us-east-1, for example.
+
+So when I do so and save this,
+
+what's going to happen is that once the TTL expires
+
+from before, we're going to get two records back.
+
+So let's use CloudShell to verify this.
+
+So I'm going to do a dig command.
+
+And as you can see,
+
+now we have in the intersection, we have two responses.
+
+We have one in this IP and one in this IP.
+
+So it's a client side choice.
+
+So that means that if I go to this website and refresh,
+
+I have one chance out of two to go into us-east-1.
+
+And I didn't.
+
+So I was back into ap-southeast-1b,
+
+but let me pause for 20 seconds and I'll get back to you.
+
+And I'm refreshing.
+
+And I get back the Hello World from us-east-1a.
+
+So this worked.
+
+This absolutely shows how simple records work.
+
+I hope you liked it, and I will see you in the next lecture.
+
+# Weighted.
+
+So now let's talk about
+
+the weighted routing policy.
+
+The idea is that you can have a percentage of requests
+
+you can control to go to a specific resource
+
+thanks to weights.
+
+So, put it simply in the diagram,
+
+we have Amazon route 53,
+
+and then we have three EC2 instance
+
+that have been assigned different weights,
+
+so 70, 20, and 10.
+
+In my example, these weights sum up to 100,
+
+but you don't have to in the real life, okay?
+
+But what this means that 70%
+
+of the DNS responses from Amazon as on route 53
+
+are going to be redirecting to the first EC2 instance,
+
+then 20% to the second and 10% to the third.
+
+So what we have to do in our weight is to assign each record
+
+a relative weights.
+
+And then the traffic percentage is going to be sent
+
+to each record, as just the weight of the record
+
+divided by the sum of all the weights of all the records
+
+which is like a percentage of all the weights, okay?
+
+The weights don't need to sum up to 100,
+
+they're just indicative of how much
+
+we want to send to this instance,
+
+compared to all the other records in your DNS name.
+
+So to make this work,
+
+the DNS records must have the same name and type,
+
+and you can associate them with health checks,
+
+although we haven't seen with health checks are again yet,
+
+but we'll have a look at them very, very soon.
+
+Now the use cases for a weighted routing policy
+
+is pretty obvious, is to do for example, load balancing,
+
+maybe across different regions, or to test a new application
+
+version by sending a small amount of traffic to it,
+
+and so on.
+
+And then if you're sending to sort of a weight of zero,
+
+then you're going to stop sending traffic
+
+to a specific resource, so you can shift weight over time.
+
+And if all the resource records will have a weight of zero,
+
+then all the records will be returned with equal weights.
+
+So let's have a look in the console
+
+to see how that works.
+
+So let's create a new record,
+
+and this one is going to be called
+
+weighted.stephanethetaccher.com.
+
+It's an A record, and the routing policy
+
+is going to be weighted.
+
+So first for the first value, let's enter the one
+
+from the ap-southeast-1,
+
+and the weights I'm going to assign to it
+
+this time is going to be 10, okay?
+
+So it's very, very small weights.
+
+For the TTL, I'm going to set it to something really low,
+
+three seconds to just show you the impact of weighted.
+
+But obviously, this is not a TTL
+
+you would use in real life.
+
+So as we can see,
+
+we can associate a health check with it,
+
+but for now we won't.
+
+And we have a record ID that we can set.
+
+And this is to identify this specific record
+
+within the weighted record sets.
+
+So for this one, I got this instance from the southeast,
+
+I'm just going to write southeast.
+
+Okay, and then we can add another record.
+
+And again, we're going to use the same
+
+weighted.stephanetheteache.com, okay?
+
+And the routing policy is going to be weighted.
+
+And the value of which is going to be
+
+the one from us-east-1.
+
+So I'm going to copy this IP and paste it here.
+
+The weight is going to be on this time 70.
+
+So we're going to send 70% of the traffic to us-east-1,
+
+and then the record ID is US East.
+
+Great, and the TTL again, three seconds.
+
+And one last record we're going to add, so again, weighted,
+
+and then the value of which is going to be
+
+eu-central-1, in here.
+
+And I'm going to send it as a weighted record.
+
+I'm going to send 20 as weights, and the record ID
+
+is going to be EU okay.
+
+And the TTL three seconds.
+
+So now let's go ahead and create these records.
+
+And as we can see, we now have three records
+
+in this table, okay?
+
+So this is why it's different from, for example,
+
+a simple record has two values,
+
+here, we have three records and each record
+
+has one value as an answer,
+
+but we have a weight of 10, 20 and 70.
+
+So if I go to the URL now,
+
+if I go to weighted.stephanetheteacher.com and press Enter,
+
+I'm getting a first response from the us-east-1a
+
+which makes sense because, well,
+
+this is where 70% of the traffic is supposed to be going
+
+okay, to this region.
+
+But if I refresh and I need to refresh
+
+maybe every three seconds, at some points,
+
+I should be getting a response from another region.
+
+And this is just based on weight,
+
+so this is the (indistinct) behind the weighted resources.
+
+So as you can see, this one is not changing a lot,
+
+so let's do a dig command just to show you
+
+the output of what it is,
+
+so dig weighted.stephanetheteacher.com.
+
+and here we get a TTL of three and the answer is,
+
+I think still the one from the us-east-1,
+
+But so let's try to issue one more,
+
+and see if we get any luckier.
+
+So the weight of 70 definitely is a big weight.
+
+Okay, but here as we can see, we just got an answer,
+
+and this one is a different IP, 3.70.14,
+
+which is corresponding to the weight of 20.
+
+So as we can see, weighted does exactly
+
+what it's supposed to do, it's redirecting
+
+most of the queries into the one that has the most weight,
+
+but from time to time, you will get other answers, okay?
+
+And so on.
+
+So this is something you can practice in your web browser
+
+as well as we can see, cool.
+
+I just get redacted into eu-central-1c.
+
+So that's it for this lecture,
+
+and hopefully it shows you the power of weighted records.
+
+I hope you liked it, and I will see you in the next lecture.
+
+# Latency.
+
+So let's talk about a routing policy
+
+that's super easy to understand,
+
+which is the latency-based routing policy.
+
+Okay.
+
+So now let's talk about latency-based routing policies.
+
+And the idea is that you want to redirect the resource
+
+that is going to have the lowest latency.
+
+So the closest to us,
+
+which is super helpful when latency is your main concern
+
+for your websites or applications.
+
+Now latency is going to be measured
+
+based on how quick it is for users to connect
+
+to the closest, identified AWS region for that record.
+
+So for example,
+
+if user in Germany and you have the lowest latency
+
+to a resource in the US,
+
+then this is where you will be redirected.
+
+And this can be combined with health checks that we'll see
+
+in the very next lecture.
+
+So let's have a look at the map of the world
+
+to understand it.
+
+Say we deploy our applications
+
+in two different parts of the world,
+
+one in us-east-1 and one in ap-southeast-1.
+
+Then the users are all around the world
+
+and the latency is going to be evaluated by Route 53.
+
+And so the users closest and with the lowest latency
+
+to the ALB, us-east-1, will be redirected there.
+
+Whereas, the other users will be redirected
+
+to ap-southeast-1.
+
+Now let's put this into practice in the console.
+
+So let's create new records.
+
+And the Record name is going to be,
+
+latency.stephanetheteacher.com.
+
+And the first Value is going to be the one
+
+in ap-southeast-1.
+
+So I'm good to paste the value in here.
+
+And then the Routing policy is going to be Latency.
+
+So when we do this thing,
+
+because we just put an IP address in here,
+
+we need to specify the region of our record.
+
+So this one is going to be corresponding
+
+to ap-southeast-1, which is at Singapore.
+
+Okay.
+
+And the reason is that Alias is not smart enough,
+
+at least in this stage,
+
+to take this IP and know that it comes from an EC2 instance
+
+that I have in Singapore,
+
+because this could be any IP in the world actually.
+
+So it's for us to specify,
+
+this IP corresponds to the region, Asia Pacific, Singapore.
+
+And then we can associate a Health check and a Record ID.
+
+So I'll call this one, ap-southeast-1.
+
+And it's just a name that I give it.
+
+Now we can add another record.
+
+Again, the Record name is going to be Latency
+
+and the value of which this one is going to be
+
+for us-east-1.
+
+So I'll have the Value here,
+
+and it's going to be Weighted.
+
+No, Latency. Excuse me, of course.
+
+And then it's us-east-1.
+
+And again, I will just have it as a us-east-1
+
+for my Record ID.
+
+And then one last record is going to be for eu-central-1.
+
+So I will copy this IP.
+
+And the Record name is this,
+
+the Value is here,
+
+the Routing policy is Latency
+
+and the Region is eu-central-1, so will be the Name.
+
+Okay.
+
+So as we can see, we have three records being created,
+
+successfully created, and this is it right here.
+
+And so now let's try them out.
+
+So right now I'm in Europe.
+
+And so if I open this,
+
+I'm expecting it to go to my instance in Europe.
+
+So I go to this URL,
+
+and I get a response, Hello World,
+
+from this IP in eu-central-1c.
+
+If I use CloudShell to try it out
+
+and we do a dig command on this.
+
+As we can see, we get an error code back of just one value.
+
+Okay.
+
+So just one value of the same IP address as this one.
+
+So this is my instance in eu-central-1c.
+
+And if I keep on refreshing,
+
+because my latency hasn't changed to eu-central-1,
+
+I'm going to get, always the same answer.
+
+Okay.
+
+But, so how do we test whether or not
+
+that latency record is working?
+
+Well, for this I can use a VPN.
+
+And so let's go to Canada, for example.
+
+And in Canada, it turns out that my latency
+
+is going to be the closest to the U.S.
+
+So if I refresh this page now,
+
+I get the Hello World from the U.S.
+
+and when I did change my location, thanks to the VPN,
+
+it cleared all the TTL that I had for my DNS cache,
+
+locally on my laptop.
+
+And so this is why automatically by refreshing it,
+
+I was able to get the newest value for us-east-1a.
+
+But again, if I use dig because this hasn't changed, okay,
+
+my CloudShell is still in Europe, okay.
+
+If I use the dig command
+
+and use the exact same command as here,
+
+I'm still going to get the exact same value as before, okay,
+
+because, this computer right here,
+
+this CloudShell sits in eu-central-1.
+
+And so this is still the closest location
+
+to eu-central-1.
+
+And how do we test the one for AP Southeast?
+
+Let's go into Hong Kong.
+
+Okay. So I'm close to Singapore now.
+
+And I will refresh this.
+
+And the answer is, Hello World, from ap-southeast-1b.
+
+So the latencies record are working
+
+and they're really, really good
+
+and very common to use online.
+
+I hope you liked it,
+
+and I will see you in the next lecture.
+
+# Health Checks.
+So let's talk about Health Checks
+
+in Route 53.
+
+So health checks are a way for you to check
+
+the health of mainly public resources,
+
+although there's a way for us to do it
+
+for private resources as well, as we'll see in this lecture.
+
+So the idea is that, for example,
+
+we have two Load balancers in different regions
+
+and they're public load balancers, okay?
+
+And behind the scenes,
+
+we have our application running in both of them.
+
+So we're running into a multi-region setup
+
+because we want high availability, and so on,
+
+at the region level.
+
+Then we're going to use Route 53 to create DNS records.
+
+So that's when users access our URL, for example,
+
+mydomain.com, then they get redirected to, for example,
+
+the closest load balancer they have.
+
+So this would be the case with a latency type of record.
+
+But we want to make sure that, if one region is down,
+
+then we don't send our users to that region,
+
+obviously, right?
+
+So to do so,
+
+we're going to create health checks from Route 53.
+
+So we'll create health checks on the one in us-east-1,
+
+and we will create a health check on our instance
+
+in eu-west-1.
+
+Well, with these two health checks,
+
+we're going to be able to associate them
+
+with our Route 53 records.
+
+And the reason we do so is to get automated DNS failover.
+
+So we have three health checks that are possible.
+
+The ones I just showed you, which are the health check
+
+that monitor an endpoint, which is a public endpoint.
+
+So it could be an application, a server,
+
+or another AWS resource.
+
+It could be a health check
+
+that monitors other health checks,
+
+also called a calculated health check,
+
+or it could be a health check
+
+that monitors a CloudWatch Alarm,
+
+which gives you more control and is helpful for private
+
+resources as we'll see in this lecture.
+
+Finally, these health checks have their own metric
+
+and you can view them in CloudWatch metrics as well.
+
+So let's look at how health checks work
+
+with a specific endpoint.
+
+So if we have a health check for eu-west-1, for an ALB,
+
+then the health checkers of AWS
+
+are coming from all around the world.
+
+So it's not just one health checker.
+
+It's about 15 health checkers from all around the world.
+
+And they're all going to send requests
+
+into our public endpoint to wherever routes we set.
+
+And then if it gets 200 OK code back or the code we defined,
+
+then the resource is deemed healthy.
+
+So about 15 global health checkers
+
+will check the endpoint health,
+
+and then you can set a threshold for healthy or unhealthy.
+
+You can set an interval,
+
+so we have two options.
+
+It could be either 30 seconds for regular health checks
+
+or every 10 seconds, which is a higher cost,
+
+which is what's called a fast health check.
+
+It supports many protocols, so HTTP, and HTTPS, and TCP.
+
+And the rule is that if over 18% of the health checkers
+
+say that the endpoint is healthy,
+
+then Route 53 will consider it healthy,
+
+otherwise it's deemed unhealthy.
+
+And you have the ability to choose
+
+which locations you want to use for the health checks.
+
+Now the health checks will only pass if you have the status
+
+2xx or 3xx status code back from the load balancer
+
+and the health check has a cool capability.
+
+So if it is a text-based response,
+
+then the health checkers can check the first 5,120 bytes
+
+of the response to look for some specific texts
+
+in the response itself.
+
+Finally, very important from a network perspective,
+
+if you want for it to work, obviously,
+
+the health checkers must be able to access your
+
+Application Balancer or whatever endpoints you have.
+
+And so therefore you must allow incoming requests
+
+coming from the Route 53 health checkers' IP address range.
+
+And you can find this address range at the URL
+
+in the bottom right of the screen.
+
+Now the second type of health checks we have
+
+are calculated health checks.
+
+And so this is to combine the results
+
+of multiple health checks into a single health check.
+
+And so if you look at Route 53,
+
+with three EC2 instance,
+
+we can create three health checks.
+
+They're all going to be children health check,
+
+and they can all monitor each EC2 instance one by one.
+
+And then we can define a parent health check,
+
+which is going to be defined
+
+on all these child health checks.
+
+And so the conditions to combine all these health checks
+
+could be an OR, an AND, or a NOT.
+
+You can monitor up to 256 child health checks,
+
+and you can specify how many of the health checks
+
+need to pass to make the parent pass.
+
+So the use case for this,
+
+for example, if you want to have
+
+a parent health check to perform maintenance
+
+on your website without causing
+
+all the health checks to fail.
+
+And so how do we monitor the health of a private resource?
+
+So in case you want to monitor something private,
+
+it's going to be difficult because
+
+while all the Route 53 health checkers
+
+live on the public web, they're outside of your VPC,
+
+so they cannot access private endpoints.
+
+So if it's a private VPC or an on-premises resource.
+
+And so the way we can do it, though,
+
+is to create a CloudWatch Metric
+
+and assign a CloudWatch Alarm on it.
+
+And then you can assign the CloudWatch Alarm
+
+into the health checker.
+
+So the idea is that we're going to monitor
+
+the health of our EC2 instance in a private subnet
+
+with a CloudWatch Metric.
+
+And then if the metric is breached,
+
+we're going to create a CloudWatch Alarm on it.
+
+And when the alarm goes into the alarm state,
+
+then the health checker is going to be
+
+automatically unhealthy
+
+and therefore will have created exactly what we want,
+
+which is a health check on a private resource,
+
+which is the most common use case on how to do it.
+
+So that's it for this lecture.
+
+I hope you liked it and I will see you in the next lecture.
+
+So let's go ahead and
+
+create some health checks.
+
+So on the left hand side,
+
+I'm going to go into the health checks, and we're going to
+
+create health checks for all our EC2 instances.
+
+So we're going to check three health checks.
+
+So the first one is going to be from an
+
+instance in US east one, and is going to be an end point.
+
+And then you'd just specify either an IP address or a
+
+domain name.
+
+So we'll keep it as an IP address.
+
+And my instance in US east one is right here.
+
+So we'll paste that in. We have to specify a port,
+
+so we'll keep it as 80, because this is the HTTP port.
+
+And for path,
+
+we're just going to be keeping the path as slash because
+
+while this is the same as the IP slash,
+
+which is the root of our website,
+
+if we had a real application,
+
+sometimes it is very common to have a path slash health,
+
+for example,
+
+which responds with the health of the endpoint itself.
+
+Okay, so we have this ready,
+
+so I'll just remove the slash health.
+
+And then we can look at some advanced configuration.
+
+So we can have either have a standard
+
+every thirty seconds or a
+
+fast every ten seconds health check.
+
+We'll keep it as standard because this is
+
+otherwise more expensive.
+
+How many times does it need to fail
+
+before being considered as a failure?
+
+Do you want to do string matching so do you want to look for
+
+a string in the first 5,120 bytes? Yes or no?
+
+Do we want a latency graph,
+
+to see how latency evolves over time?
+
+Do we want to invert the health check status.
+
+Do we want to be healthy and vise-versa.
+
+Or disable it.
+
+And then do you want to customize the regions of
+
+the health checkers?
+
+Or do you want to use the recommended and we'll just keep it
+
+as is with using recommended?
+
+So every option is pretty much as default.
+
+And do we want to be notified whenever this health check
+
+fails? Yes or no by creating alarm?
+
+I will just say no for now.
+
+So we have created our first health check.
+
+Now let's create our second health check and it's going to
+
+be for AP Southeast one. So AP Southeast one,
+
+and then IP address right here,
+
+not host name. And then next and create.
+
+And the last health check is for EU central one.
+
+So let's create this health check and I will name it
+
+EU central one.
+
+And then here is the IP address and click on next and
+
+create health check.
+
+Okay. So our health checks are created.
+
+And what I'm going to do is I'm going to go to one of my
+
+instances, for example,
+
+the one in Singapore and for the security group,
+
+I'm going to start blocking the port 80, removing this rule.
+
+And the idea is that I want to get a failing health check.
+
+So I'm going to go into the security group right here.
+
+I will do action and end it's the inbound rules,
+
+and it will delete my HTTP based rules.
+
+And what this will do is that's the one health check
+
+for AP Southeast one should give me a unhealthy status.
+
+So let me wait a little bit for the health checkers to do
+
+their thing, and then we'll get back to you.
+
+Okay. So as we can see, we have three health checkers,
+
+and one of them is unhealthy,
+
+obviously because I locked at the security group and the
+
+other two healthy because I don't see any
+
+security group event.
+
+So we can have a look at the health checkers and to give you
+
+some information around when it was last checked and so on.
+
+And for the unhealthy one, we can view the error status.
+
+So if we look at view last failed check,
+
+we can see that there was a connection timeout,
+
+and maybe the requests are being blocked by my firewall and
+
+firewall is your security group. So that makes sense.
+
+So at least it gives us some information and they are
+
+working just as expected.
+
+And one last thing and you can create is a calculated
+
+health check.
+
+And this one is going to be a calculated health check,
+
+Cal-cu-lated. Here we go.
+
+And this going to check for the status of
+
+other health checks.
+
+And now we can specify which health checks
+
+we want to monitor.
+
+And okay,
+
+we're saying maybe you want to report healthy when one of
+
+the three health checks are healthy or when 2,
+
+or when all of them are healthy.
+
+So this is an AND or one or more health checks are healthy.
+
+So this is,
+
+so we can definitely create as complicated rule.
+
+So I would just keep it as this should be healthy when all
+
+of my health checks are healthy and then
+
+click on next, next.
+
+And we have created a calculated health check and the last
+
+kind of a health check we can create is to monitor the
+
+state of a CloudWatch alarm.
+
+In which case we need to specify the region
+
+the alarm is going to be in,
+
+and then this alarm could be monitoring.
+
+Obviously the state have a private EC2 instance
+
+for example.
+
+And this is how we would link the health check,
+
+the health of a private resource
+
+into a route 53 health check. Okay.
+
+But I can't create it right now because I don't have
+
+an alarm available for us. Okay.
+
+Okay.
+
+So my calculated health check is now reported unhealthy
+
+because well, one of the health checks,
+
+I'm trying to monitor is unhealthy,
+
+and this is how we define it.
+
+So that really shows you the power of health checks.
+
+And in the next lecture, we'll be using them of course,
+
+alongside records in route 53.
+
+So I hope you liked this lecture and I will see you in the
+
+next lecture.
+
+# Failover.
+
+Okay, so now let's talk about routing policies
+
+and this one is going to be for the failover.
+
+So the idea is that we have route 53 in the middle
+
+and we have EC2 instances,
+
+one is going to be our primary EC2 instance,
+
+and the second one is going to be a secondary,
+
+or disaster recovery, EC2 instance.
+
+In this case, what's going to happen is that we're going
+
+to associate our primary record with a health check,
+
+and this is mandatory.
+
+And if the health check it becomes unhealthy,
+
+then route 53 is going to automatically failover
+
+to the second EC2 instance,
+
+and start sending that result back instead.
+
+And of course the secondary EC2 can also be
+
+associated with the health check as well, if we want it to.
+
+But there can only be one primary and one secondary.
+
+Now the client, when it makes DNS requests,
+
+will automatically get the resource that is deemed healthy.
+
+So if our primary is healthy,
+
+then route 53 will answer with a primary record.
+
+But if the health check is unhealthy, automatically,
+
+we will get the response of the second record,
+
+which really helps us do (indistinct) a failover.
+
+So that's it, let's go in the hands-on
+
+to see how we can practice this.
+
+Okay, so now let's leverage these health checks
+
+and create a failover record.
+
+So in my hosted zone, I'm going to create a record,
+
+and this one's going to be called
+
+failover.stephanetheteacher.com,
+
+and it's the A record,
+
+and the first value is going to be
+
+for my EU-central-1 instance, so the one close to me,
+
+and the routing policy is going to be a failover.
+
+So the TTL will set it something really low,
+
+like 60 seconds.
+
+And the failover record type has two options.
+
+It could be either primary or secondary, just these two.
+
+So this is my primary record, and I will associate it
+
+with a health check, I have to.
+
+So it will associate with my health check
+
+named EU-central-1,
+
+and the record ID is going to be E.
+
+So what this is saying is that this record
+
+should be my primary one,
+
+but this is going to be associated with a health check,
+
+which means that you can failover to a second record.
+
+So let's add a new record, and I will keep the record name
+
+as failover.stephanetheteacher.com,
+
+and the value of which is going to be my instance
+
+in US-east-1.
+
+Okay, we're still going to have to do a failover,
+
+the TTL is 60 seconds,
+
+and the failover record type is going to be secondary.
+
+Now we can optionally associate your health check with it,
+
+okay, of US-East-1, but you don't have to.
+
+And the record ID is going to be US.
+
+Now let's create this record,
+
+and notice it was successfully created.
+
+And so let's go back into our health checks.
+
+And currently these two health checks
+
+I've associated with my records are healthy.
+
+So if I go into the URL,
+
+so if I go to failover.stephanetheteacher.com,
+
+right now, I get an answer from EU-central-1c,
+
+That's perfect.
+
+But what I'm going to do is trigger a failure.
+
+So let's go into the EU-central-1 region,
+
+and I'm going to find my instances, here,
+
+and I'm going to find the security group,
+
+and I'm going to, again, stop some security group roles.
+
+So let's refresh this page.
+
+It does exist, that's perfect.
+
+And for the inbound rule, I'm going to edit it,
+
+and it will remove the rule on port A.
+
+So that will make my instance completely unreachable
+
+from the health checkers.
+
+So what I have to do now is to wait for this health check
+
+to become unhealthy,
+
+and then we'll be able to test the failover.
+
+So let's refresh, and as we can see now,
+
+my EU-central-1 health check is deemed unhealthy,
+
+and we can look into the monitoring tab and see
+
+really when it got a unhealthy, so this is quite cool.
+
+So the health checker was positive,
+
+and then it went to zero,
+
+and then we can see how many percentage
+
+of the health checkers did report healthy,
+
+and again, this went one down to zero.
+
+So what this means,
+
+is that now that this health check is unhealthy
+
+because of the way we set up the failover
+
+that was linked to this health check.
+
+Then next time I refresh this,
+
+I should not be in Eu-central-1c,
+
+I should be in US-east-1.
+
+So let's refresh this (indistinct) page,
+
+and yes, the answer is that we are in US-east-1.
+
+And so the failover did work seamlessly behind the scenes.
+
+And while to fix it, you just go back
+
+into your security group, you would edit the inbound rule,
+
+and then you would add back the HTTP rule,
+
+and then automatically the health check
+
+is going to pass again, and therefore we are going to
+
+failover back to our primary location, okay.
+
+So that's it for this lecture, I hope you liked it,
+
+and I will see you in the next lecture.
+
+# Geolocation.
+
+So now let's talk about the Routing Policy-Geolocation,
+
+which is very different from Latency-based.
+
+So, this is based on where the user is actually located.
+
+So, for example, you can say,
+
+if a user comes from a specific continent,
+
+or a country, or even more precise, on the U.S. states,
+
+and, the most precise location is going to be selected
+
+at first, then routed to this IP.
+
+So, you should create a default record,
+
+in case there's going to be no match on location,
+
+and the use case for this is going to be
+
+for website localization,
+
+to restrict content distribution,
+
+do load balancing, and so on.
+
+And these type of records can be associated
+
+with health checks.
+
+So the idea is that, if we have a map of Europe,
+
+with multiple countries, we can define a geolocation record
+
+for Germany, to see the German users should go to this IP,
+
+which contains my German version of my app.
+
+And if I go to France, then go to this IP,
+
+which contains a French version of my app.
+
+But for anywhere else, go to the default IP here,
+
+which contains maybe the English version of my app.
+
+So, this is how you would use a geolocation.
+
+Now, let's go practice in the console.
+
+Okay, so, let's go ahead, and create our first geo record.
+
+So, I'm going to create a record, and I'm gonna make geo,
+
+and, the record type would be A, the value of it is,
+
+let's link it first to the ap-southeast-1.
+
+And, what we're going to do here is going to say,
+
+the routing policy is going to be geolocation.
+
+And we're saying, okay, all of Asia,
+
+so, any user located in Asia,
+
+should go to my ap-southeast-1 EC2 instance.
+
+We could associate a health check with it if we wanted to,
+
+we need to give a record ID, so, here we go.
+
+Now, let's add another two records.
+
+So what I'm going to do is that, I'm going to say that's,
+
+for
+
+us-east-1.
+
+I want to send any user from,
+
+and, we can say geolocation yet again.
+
+And let's say, for example, just a country,
+
+so we can say, United States.
+
+And, we could say lastly, so this is record ID, U.S.,
+
+and so, as you can see here, I specified a country,
+
+and here's specified a whole continent, it doesn't matter.
+
+And then lastly, we'll add one more record,
+
+here's the record name,
+
+and the value of which, is going to be eu-central-1.
+
+And, this one is going to be my defaults,
+
+so, I'm going to say, geolocation,
+
+and the location is default,
+
+that means that anything that doesn't match Asia
+
+or United States, is going to go to my default location,
+
+and this one is going to be called, Default EU.
+
+Now, it's create these records,
+
+and they've been successfully created.
+
+So, what I can do now is that I can test it, right?
+
+So, currently, I am not in the U.S., and I'm not in Asia.
+
+So, if I open this URL, I will get the eu-central-1 region,
+
+so, this is good, that means that
+
+this is the default record,
+
+that is pure, that is working properly.
+
+So now, let's change geographic location, and to do so,
+
+I'm going to use my VPN, and now let's go to an,
+
+a country in Asia, so let's go to India.
+
+So, I'm now connected into India.
+
+And, when I refresh this page now,
+
+what I expect is to get a Hello World,
+
+from my ap-southeast-1 instance.
+
+Oh, as you can see, there's a, a long load,
+
+so, I know what's happening, so, this is a timeout,
+
+and so, whenever you see a timeout in AWS,
+
+usually you have to think about security groups.
+
+So, if I go to my security group,
+
+yes, I'm in the right region, so in the Singapore region,
+
+and look at the Inbound rules, and edit them.
+
+If you remember, I had removed that the HTTP rule
+
+to make the health check fail,
+
+so, we need to add back that HTTP rule,
+
+so, let's add it back, and it's a good edit on your screen.
+
+So, the HTTP rule has been added back,
+
+and so now, if I go back into this page,
+
+as we can see, now, we get the Hello World from
+
+ap-southeast-1b, so, the Asia thing is working.
+
+Now, if I go to a country in the U.S.,
+
+if I go to the United States, overall,
+
+and, I'm in the U.S.,
+
+and refresh, I'm going to get Hello World from us-east-1a,
+
+so, this is perfect.
+
+And, if I go to something right next to the U.S.,
+
+but not in the U.S., for example, if I go to Mexico.
+
+And refresh, as you can see, I get my eu-central-1c,
+
+because this is my default record,
+
+and, the Mexico was not specified as a rule
+
+in the geolocation Route 53 record.
+
+Okay, so this is it, this is working perfectly.
+
+I hope you like this lecture,
+
+and I will see you in the next lecture.
+
+# Geoproximity.
+
+So now, let's talk about another feature
+
+which is called Geoproximity Routing.
+
+And it can be a little bit confusing
+
+but I will try to explain with diagrams
+
+in the very next slide to make it clear.
+
+So this allows you to route traffic to your resources based
+
+on the geographic location of your users and resources.
+
+So the idea is that with this policy,
+
+you're able using a number called the bias
+
+to shift more traffic to resources
+
+based on specific locations.
+
+And it will show you this in a diagram
+
+in the very next slide.
+
+So the idea is that to change the size
+
+of a geographic location, you need to specify a bias value.
+
+If you want more traffic to go to a specific resource,
+
+you expand the bias value by increasing it.
+
+And if you want less traffic to go to your resource,
+
+you shrink it, you decrease the bias values
+
+to a negative number.
+
+So the resources can be resources from AWS,
+
+in which case you specify the region they're in
+
+and automatically a list will compute the correct routing.
+
+Or if there are none, AWS resources exercise
+
+such as your on premises data center.
+
+Then, you will just need to specify the latitude
+
+and longitude, so the AWS knows where they are right now.
+
+And then it chooses feature,
+
+you need to use the advanced Route 53 Traffic
+
+flow to be able to leverage the bias.
+
+So the diagram should make everything more simple.
+
+And to me, this is what you should remember.
+
+So let's take an example of a resource in us-west-1,
+
+and one resource in us-east-1.
+
+And the bias is set to zero in both regions.
+
+So that means that if you have users all around the US
+
+trying to access these resources,
+
+there's going to be a line dividing the US is too into two,
+
+and users left of that line will go to us-west-1,
+
+and user rights of that line will go to us-east-1.
+
+Now, this is simple, this is when there is no bias, okay?
+
+And this looks like going to the closest resource region
+
+based on the user location.
+
+But thanks to the bias, we can have the same setup
+
+but a different way to have the users routed
+
+to different regions.
+
+So let's take an example.
+
+We have us-west-1 and us-east-1,
+
+and the bias is set to zero in us-west-1,
+
+but we're going to have a positive bias of 50 in us-east-1.
+
+And we've seen that the bias make more users
+
+and more traffic to that resource.
+
+Why?
+
+Well, because of the bias now the quote in quote,
+
+dividing line between the first.
+
+The two resources is going to be a little bit more
+
+to the left because of the higher bias of us-east-1.
+
+And so that means is that's the user left
+
+of that line can go to us-west-1,
+
+but the users right or that one will go to us-east-1.
+
+So what we do this?
+
+Well, for example, you would set your resources
+
+all around the world and say you needed to shift
+
+more traffic to a specific region.
+
+What you would do is that you will use
+
+a Geoproximity Routing Policy to increase the bias
+
+in that specific region.
+
+And therefore, have more users dragged
+
+and more users have traffic attracted to that region.
+
+So what you to remember going into an exam is
+
+that the Geoproximity Routing is really helpful
+
+when you need to shift traffic
+
+from one region to another, by increasing the bias.
+
+Okay?
+
+So hopefully the diagrams helped you make more sense
+
+of the Geoproximity Routing Policy.
+
+I hope you liked this lecture,
+
+and I will see you in the next lecture.
+
+# Traffic Flow & Geoproximity Hands On.
+
+So, let's have a look into a way
+
+we can build these complex geoproximity records
+
+using a feature called Traffic Flow.
+
+This is not just applying to geoproximity,
+
+but applies to everything.
+
+So, the idea is that we have a UI, a visual editor,
+
+that allows us to manage complex routing decision trees.
+
+So, this is the UI we'll have,
+
+and in there we can specify different rules.
+
+We'll have a play with it.
+
+Though the idea is that instead of writing the records
+
+one by one in your DNS management system in Route 53
+
+we're going to just manage all of them visually.
+
+And the cool thing about it is that it's going to be saved
+
+as a Traffic Flow Policy,
+
+and it can be versioned,
+
+it can be applied to different hosted zones,
+
+and we can easily change them
+
+and apply them in our hosted zones.
+
+So, let's have a look in the hands-on right now
+
+to see how we can do it.
+
+Okay, so let's go ahead.
+
+We're gonna go on the left-hand side panel,
+
+and you will find Traffic policies.
+
+So, in here we get the UI,
+
+we can create a Traffic Policy.
+
+And I'll call this one DemoGeoPolicy, and click on Next.
+
+So, here we have a starting point,
+
+and the starting point is you have to specify
+
+the type of record you want to create.
+
+Is it an A, AAAA, CNAME, etcetera, etcetera,
+
+and it gives you a detail about what each record is.
+
+So, we'll have an A record,
+
+and here we have to connect to a specific rule.
+
+And as you can see, we can get Weighted rule,
+
+Failover rule, Geolocation rule, Latency rule,
+
+Multivalue, Geoproximity, or just an endpoint.
+
+So, if you wanted to specify something very simple,
+
+for example an A into an endpoint,
+
+you could say the A record will point to this value
+
+one, two, three, four, five, six, seven, right?
+
+And this would be the record itself,
+
+a very, very simple record.
+
+But obviously we can create more complicated policies.
+
+So, we can connect to a Weighted rule,
+
+and here we can specify multiple weights.
+
+So, we say a weight of 10 goes to, and then again,
+
+we could have some advanced records, for example,
+
+a Failover and so on.
+
+So, we can get some really complicated stuff.
+
+And when you're ready you can say endpoint,
+
+and specify the value of the IPv4 that you want.
+
+So, obviously we're not going to build
+
+something as complicated.
+
+As you can see, on the Weighted rule for example
+
+we can add another weight, and so on, and so on.
+
+And so, all of it is visual,
+
+and it really allows us to make sense
+
+of what is happening within Route 53.
+
+So, we are not going to create a Weighted rule though,
+
+we are going to create a Geoproximity rule.
+
+And we can show the map as well to have a visual feedback
+
+of what we're trying to do.
+
+So, here we have to enter the first region,
+
+and then we can have the second region.
+
+So, now for the first endpoint location
+
+you can enter custom coordinates, or you can, for example,
+
+have one of these regions of AWS available to you.
+
+So, we're going to use the ones we have created from before.
+
+So, we'll choose US-East-1,
+
+and then we have to specify a bias.
+
+And then I will move the map a little bit to the left,
+
+I will just remove it for now.
+
+And then this record right here is going to connect
+
+to a new endpoint,
+
+and the value of it
+
+is going to be my US-East-1 EC2 instance.
+
+So, I will paste the value, and we're good to go.
+
+For now we'll leave the bias as zero.
+
+Then for the second region we can enter some coordinates.
+
+So, we can say for example Singapore,
+
+which was AP Southeast 1.
+
+And let's do it, Singapore, again, here we go.
+
+And then this is going to connect to a new endpoint,
+
+and that endpoint has to be my IP address of AP-Southeast-1.
+
+Press Enter, and we're good to go.
+
+So, now that we have created this policy
+
+let's have a look at the map.
+
+So, for this I will click on Show Map.
+
+And so, this geoproximity map is going to show me,
+
+based on the input I have right now,
+
+which users are going to go to which instance.
+
+So, if you're on that side of the world,
+
+the blue side of the world,
+
+as you can see there's a line dividing
+
+the blue and the orange side of the world,
+
+then you're going to go to my first instance.
+
+If you're on the second side of the world
+
+you're gonna go to my second instance.
+
+And if we change the bias,
+
+so if we increase the bias for example
+
+of my instance in here, so we put a bias of 34,
+
+this is going to increase the surface of the world
+
+that is going to be redirected
+
+to my instance in North America.
+
+If I decrease the bias to something negative
+
+it's going to do the opposite thing.
+
+It's going to center more of the traffic
+
+onto my instance number two.
+
+So, we can really play it and really have a visual aspect,
+
+and the cool thing is that we can consider
+
+more than two instances.
+
+Of course, we can add another geoproximity location,
+
+and for the details we're going to say
+
+this is in Frankfurt.
+
+And then we're going to have, as you can see now, a new map.
+
+And again, you can play with the bias,
+
+and see how the bias is going to impact
+
+your geoproximity map.
+
+And so, this Frankfurt, we're going to have it
+
+to a new endpoint.
+
+And we'll have the EU-Central-1 in here, paste it,
+
+and then Create traffic policy.
+
+So, we've done this one,
+
+and now we need to deploy this
+
+traffic policy with policy records.
+
+So, for this I will just deploy this one
+
+into the hosted zone, stephanetheteacher.com,
+
+and we can set that, this policy record name
+
+is going to be proximity.stephanetheteacher.com.
+
+And we can specify a TTL.
+
+And very importantly,
+
+the pricing per month is $50 per month,
+
+so to just create this policy record
+
+you will pay $50 per month.
+
+It's prorated obviously for how long you keep it,
+
+but if you want to remain within the free tier and,
+
+you shouldn't create it obviously.
+
+So, I'll just create it just to show you what it means,
+
+and I will delete it right after.
+
+But this is not necessary for you to go
+
+all the way, obviously.
+
+So, let's create this policy record.
+
+As you can see now, the policy versions are here.
+
+So, we can edit this policy if we wanted to,
+
+and edit this and deploy it as a new version.
+
+And from there we can see the records that have been created
+
+with this DemoGeoPolicy.
+
+And so, if we have a look again at the map
+
+we can demonstrate how this works.
+
+So, let's click on this Geoproximity rule in here,
+
+so let's edit this as a new version, Next,
+
+and then click on this map.
+
+So, as we can see, if I'm in Europe, like I'm in France,
+
+I will be able to connect to this instance,
+
+if I'm in Brazil I will connect to that instance,
+
+and if I am in, for example, India, again,
+
+I will connect to that region.
+
+So, we'll verify this in a second by testing the record.
+
+So, let's cancel and wait for this to be created.
+
+So, the policy record has been applied.
+
+As you can see, the version used is number one.
+
+So, if I connect from where I am, I'm in Europe right now,
+
+I will get the EU-Central-1,
+
+and so, which is perfect.
+
+If I go to Brazil, for example, zed, and refresh my page,
+
+and then it should be connecting to my American instance.
+
+So, let's verify this in a second.
+
+Yes, and finally, if I connect to something in Asia,
+
+so let's change this.
+
+Let's go to Thailand, for example,
+
+and then refresh, I'm gonna get my AP-Southeast-1b instance.
+
+So, this is perfect.
+
+And if we go back into Route 53 now and refresh this
+
+you can see if I go to Filter and type proximity
+
+the record itself, this proximity record,
+
+is directly routing to a traffic policy record, okay?
+
+And the only way I can edit this record
+
+is if I click on Edit right here,
+
+and this will take me directly
+
+into the traffic policy UI, okay?
+
+So, that's it for this lecture.
+
+I'm just going to save some money, obviously,
+
+and delete this policy record right now
+
+so it doesn't cost me $50 a month.
+
+And I hope you liked this lecture.
+
+I will see you in the next lecture.
+
+# IP-based.
+
+So now let's talk
+
+about another routing policy
+
+called the IP-based Routing
+
+which is very intuitive to think about
+
+because you're going to define the routing based
+
+on the client IP addresses.
+
+In Route 53, you're going to define a list of CIDRs,
+
+they are IP ranges for your clients,
+
+and you're going to say, based on the CIDR
+
+which location the traffic should be sent to.
+
+So the use cases will be to optimize performance
+
+because you know the IP ahead of time
+
+or to reduce network costs
+
+because you know where the IPs are coming from.
+
+So an example is that if you know
+
+that you have a specific internet provider
+
+and they are using a specific CIDR of IP addresses
+
+you can route them
+
+to a specific endpoint thanks to this strategy.
+
+So let's go for an example.
+
+In Route 53, I'm going to define two locations
+
+with two different CIDR blocks.
+
+As you can see, one start with 203
+
+and the other one start with 200 and the defined IP ranges.
+
+Now we are going to link these locations
+
+to a specific record.
+
+So for example.com we're going to have location one.
+
+So the first CIDR block to send
+
+to the value 1.2.3.4,
+
+and the second location, the CIDR block number two,
+
+to send it to 5.6.7.8.
+
+And these represents the public IP of two EC2 instances.
+
+Now, as you would expect, if a user comes in
+
+with a specific IP that is part
+
+of the location one CIDR block, they will be directed
+
+to the first EC2 instance of IP 1.2.3.4,
+
+and the user B, with a second IP address
+
+that belongs to the location two,
+
+will be redirected and will have a DNS query response
+
+to the EC2 instance of IP 5.6.7.8.
+
+And that's it for IP based routing.
+
+It's very simple and I hope you liked it.
+
+I will see you in the next lecture.
+
+# Multi Value.
+
+Let's talk about the last routing policy,
+
+which is Multi-Value,
+
+which is going to be used when you want to route traffic
+
+to multiple resources.
+
+And Route 53 will therefore
+
+return multiple values or resources.
+
+Now, you can associate them with Health Checks,
+
+and so therefore the only resources returned
+
+via the Multi-Value policy are going to be the ones
+
+that are associated with a healthy Health Check.
+
+So up to eight healthy records are going to be returned
+
+for each Multi-Value query.
+
+And although it looks like an ELB,
+
+it's not a substitute for having an ELB.
+
+The idea is that it's the client-side load balancing.
+
+So let's look at an example.
+
+We are going to set up multiple A Records
+
+for our example.com,
+
+and we associate them with Health Checks.
+
+So when a Multi-Value query is done by our clients,
+
+it's going to receive up to eight records back,
+
+and then the clients will choose one of them.
+
+But at least by combining this with Health Checks,
+
+we know that one of the eight records being returned,
+
+or up to eight, are going to be healthy.
+
+And therefore the client
+
+can have very safe queries into them.
+
+This is going to be different, for example,
+
+when you have a simple routing with multiple values in it,
+
+because as you know, the simple routing policy
+
+does not allow for Health Checks,
+
+and therefore it's possible
+
+that one of the resources returned in the query
+
+of a simple routing policy will be unhealthy.
+
+This is why Multi-Value are a little bit more powerful
+
+as types of records.
+
+So let's have a look in the UI at how we can test them.
+
+So let's practice the Multi-Value record.
+
+So let's go and create a multi-record,
+
+so a multi dot blah blah blah.
+
+And then the value of it
+
+is going to be linked to us-east-1.
+
+So I will add this value here,
+
+and then the Routing policy is going to be Multivalue.
+
+The Health check is going to be us-east-1.
+
+And the Record is going to be US.
+
+And TTL is going to be 60 seconds.
+
+Let's add another Record.
+
+So, multi, and again,
+
+we're going to route to a different region,
+
+so this one is ap-southeast-1.
+
+So the answer is Multivalue answer.
+
+The Health check is ap-southeast-1.
+
+And the Record ID is going to be Asia.
+
+And then the record TTL is one minute.
+
+And then finally, the last one,
+
+so again, one more Record name.
+
+The Value is going to be linked to eu-central-1 right here.
+
+The TTL is one minute.
+
+And the Routing policy is Multivalue answer.
+
+And for the Health checks,
+
+we're going to use the one from eu-central-1.
+
+And the Record ID is EU.
+
+Okay, so let's create these records.
+
+And the records are successfully created.
+
+Now let's test it out.
+
+So for this, we're going to use our CloudShell in here.
+
+So let's reconnect to CloudShell.
+
+And what I want to do is to test this record.
+
+So I will copy the record in here,
+
+and then I will clear my screen.
+
+And so if I test a dig on this,
+
+then I get three answers.
+
+So the three IPs are returned,
+
+and the reason is, well,
+
+the three health checks are fully working.
+
+So as you can see, they're all healthy.
+
+But if I take one of them, for example,
+
+I remove the eu-central-1,
+
+so I'm gonna make this one unhealthy,
+
+and I'm just going to trick it
+
+by editing and do an Invert health status.
+
+So this is going to make the healthy unhealthy,
+
+and vice versa.
+
+It's just a quick way for me
+
+to create an unhealthy health check.
+
+So let me pause right now.
+
+Okay, so now my eu-central-1 health check is Unhealthy.
+
+And so if I reissue a dig command right here,
+
+I should expect to see only two values, yes, as a result.
+
+So the Multivalue answer has worked,
+
+and it worked really well.
+
+So just to revert this, edit this health check,
+
+and let's untick this Invert health check status,
+
+and we're good to go.
+
+Okay, so that's it for this lecture.
+
+I hope you liked it.
+
+And I will see you in the next lecture.
+
