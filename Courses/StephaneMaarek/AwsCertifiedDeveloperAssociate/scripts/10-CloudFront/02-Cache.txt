@@ -1,0 +1,953 @@
+# Caching, Caching Policies.
+
+So let's take some time
+
+to understand how caching works in CloudFront.
+
+So the cache lives
+
+at each CloudFront edge location.
+
+So you'll have as many caches
+
+as edge locations.
+
+And each object in the cache
+
+is going to be identified
+
+by a Cache Key.
+
+We'll see what the Cache Key is
+
+in the next slide.
+
+But the idea is that a request made
+
+through CloudFront edge location.
+
+The edge location is first going
+
+to check whether or not the object
+
+has been cached.
+
+And if it's in the cache,
+
+has it expired or not based
+
+on the time to live.
+
+And then if not,
+
+if it's not in the cache,
+
+then the request is forwarded
+
+and we'll see how it's forwarded
+
+to your origin.
+
+And then the response from the origin
+
+is cached into your edge location.
+
+So that future request return a cache result.
+
+So you want to maximize the Cache Hit ratio
+
+by minimizing request to the origin.
+
+That means that you want to cache
+
+as much stuff as possible
+
+in your edge locations.
+
+We'll see as well that it's possible
+
+for you to not wait
+
+until the item expires based on a TTL.
+
+If you wanna remove it from the cache,
+
+you can create an invalidation.
+
+So what is a CloudFront Cache Key
+
+and what do we cache on?
+
+Well, a Cache Key is a unique identifier
+
+for each object in the cache.
+
+And by default, if you don't do anything,
+
+it's made up of the host name
+
+and the resource portion of URL.
+
+So in this example,
+
+there is mywebsite.com.
+
+So that's the host name.
+
+And then there is the
+
+GET/content/stories/example-story.html.
+
+That is the resource portion of the URL.
+
+That means that anyone
+
+that makes a similar request
+
+in case there is a cache miss,
+
+well, first, we're going
+
+to get the object from the origin
+
+but then the object
+
+is going to be cached
+
+based on these two keys right here,
+
+the host name
+
+and the resource portion of the URL.
+
+And then a request that looks similar
+
+with the same host name
+
+and the same resource portion
+
+will hit the cache
+
+and will get a cache hit.
+
+But sometimes you want your Cache Key
+
+to be a bit more complicated
+
+because sometimes, well,
+
+you have content that will vary
+
+based on the user
+
+or the device or the language
+
+or the location the user
+
+is from and so on.
+
+And so we want to do
+
+is to enhance the Cache Key
+
+and add more information.
+
+So we wanna add maybe HTTP headers
+
+or cookies or query strings in it.
+
+And to define how to create
+
+that Cache Key, we have to define
+
+what's called a CloudFront cache policy.
+
+So this cache policy can be caching
+
+based on the HTTP headers.
+
+So you can select none of them
+
+or a whitelist to say
+
+which one you want to include.
+
+You have the cookies.
+
+So you can select none of them,
+
+a whitelist or list you wanna include
+
+or all or all accept.
+
+And we have the query strings.
+
+Again, similarly, do you want
+
+to include none of them,
+
+a whitelist, all except, or all?
+
+And this is basically going
+
+to configure how your Cache Key
+
+is going to be created.
+
+In the cache policy,
+
+you can also control the TTL.
+
+So from zero seconds up
+
+to one year in the cache.
+
+And then you can also control
+
+that setting using specific headers
+
+called the cache control header
+
+or the expires header.
+
+So you can create your own cache policies
+
+or you can use predefined
+
+managed policies by AWS.
+
+And the very important thing
+
+I want you to remember
+
+is that all the HTTP headers,
+
+cookies and query strings
+
+that you include in the Cache Key
+
+will be automatically included
+
+and forwarded to your origin request.
+
+So in the case of HTTP header
+
+to give you an example,
+
+let's say we have this request
+
+and we have a language fr-fr,
+
+meaning that we request the blog
+
+in the French language.
+
+How does that work?
+
+Well, if we define a none
+
+HTTP header cache policy,
+
+then none of the headers
+
+are going to be cached
+
+and the headers will not be forwarded
+
+unless and I will show you what happens
+
+in the rest of this lecture.
+
+So by default, headers
+
+will not be forwarded.
+
+But this gives you
+
+the best caching performance
+
+because you don't have any headers in it.
+
+If you want to whitelist specific headers
+
+and that may mean necessary
+
+because while you want
+
+to have the language as a Cache Key,
+
+then you specify which headers you want
+
+to include in the Cache Key,
+
+for example, the language header.
+
+And then this header, the language
+
+will also be forwarded to your origin
+
+so that the origin
+
+can actually respond to the request
+
+and give you the blog
+
+in the correct language.
+
+So this is a very similar mechanism
+
+for query strings.
+
+So query strings are what happens
+
+in the URL after a question mark.
+
+So for example, border equals red
+
+and size equals large.
+
+So here, we want a cat image.
+
+But apparently, it's going to be customized
+
+a little bit by the origin.
+
+So again, if you have none,
+
+then none of the query strings
+
+are going to be used for the Cache Key
+
+and they're not going
+
+to be forwarded to your origin.
+
+Whitelist, you specify
+
+which query strings you want included.
+
+Include all-except, you specify
+
+which ones you don't want
+
+but the rest passes
+
+and all is including all the query strings
+
+in the Cache Keys
+
+and all the query strings
+
+are going to be forwarded.
+
+But of course, if you have many,
+
+this gives you the worst caching performance.
+
+So we've seen that
+
+when we define a cache policy,
+
+we can have query strings,
+
+cookies and headers as whitelist.
+
+For example, to choose (indistinct) want
+
+and they will be forwarded to the origin.
+
+But what if you want
+
+to include some stuff
+
+in the origin request, okay?
+
+But you don't want to include them
+
+in the Cache Key.
+
+In that case, you can define
+
+what's called an origin request policy.
+
+So the idea is that
+
+you can include extra HTTP headers
+
+or cookies or query strings
+
+but they will be forwarded to the origin
+
+but they're not going to be used
+
+in the Cache Key.
+
+So you can also,
+
+as part of the origin request policy,
+
+add custom HTTP headers
+
+or CloudFront HTTP headers to the origin
+
+even though they were not present
+
+in the viewer request.
+
+For example, if you wanted
+
+to pass an API key or a secret header.
+
+So you can create your own policy
+
+or you can use predefined managed policies.
+
+And so at this point,
+
+you may be confused like,
+
+what is really the difference
+
+between Cache Keys
+
+and origin request policy?
+
+Well, let me try to summarize
+
+as best as I can.
+
+So the request will come
+
+with some query strings,
+
+some cookies, some headers,
+
+and then we will cache based
+
+on the cache policy.
+
+For example, we want to cache here
+
+on the host name, the resource,
+
+and a header called authorization.
+
+But then, your origin may need more
+
+than these three things to actually work
+
+and to actually serve properly the request.
+
+So you may want to add the user agents,
+
+the session ID and the ref query string
+
+as part of your request to the origin.
+
+So in this case,
+
+the request to the origin
+
+is going to be enhanced
+
+but then the caching will not happen
+
+based on what we forwarded
+
+to the origin request policy.
+
+It's only going to be based
+
+on the cache policy.
+
+So I hope you see the synergy
+
+between these two
+
+and that should be enough
+
+to answer questions at the exam.
+
+All right, that's it.
+
+I hope you liked it
+
+and I will see you in the next lecture.
+
+# Cache Invalidations.
+
+So now, let's talk about cache invalidations
+
+in CloudFront.
+
+So, CloudFront has a backend origin,
+
+of course.
+
+And if you do happen to update the backend origin,
+
+CloudFront edge locations will not know about it
+
+and will only get the refreshed content
+
+from your backend origin, the update you want,
+
+once the TTL of the cache has expired.
+
+But that is maybe an undesirable behavior for you
+
+because you want the new content to be served
+
+as soon as possible.
+
+And therefore, what you can do is you can force an entire
+
+or a partial cache refresh.
+
+And therefore, you eliminate all the TTL happened,
+
+present in your cache.
+
+And to this, you too,
+
+perform what's called a CloudFront invalidation.
+
+So, you need to pass in some file path.
+
+So, you can either invalidate all the files with a star
+
+or invalidate a special path,
+
+for example, /images/*.
+
+Okay, so how does that work?
+
+Well, say we have a CloudFront distribution,
+
+two edge locations.
+
+Each edge location has its own cache,
+
+which contains the index.html and the images directly
+
+from your origin, which is an S3 bucket.
+
+And it does happen that, for example,
+
+the TTL for these files are set to one day.
+
+So, that means that in one day,
+
+the edge locations will re-fetch these files for the cache.
+
+Now, you as a user,
+
+you're an admin, you're going to update the files
+
+in the S3 bucket.
+
+You're going to add or change some images.
+
+And also, change the index.html file.
+
+And you want these updates to be reflected
+
+as soon as possible to your users in CloudFront.
+
+Therefore, what you can do is
+
+that you're going to invalidate two path.
+
+First is going to be the /index.html
+
+to invalidate a specific file.
+
+And then you're going to invalidate /images/*
+
+to remove all the images from the cache
+
+in your edge locations.
+
+So, then CloudFront is going to tell the edge locations
+
+to invalidate these files from the cache
+
+and they're going to be simply removed from the cache.
+
+Now, next time a user is going to ask for,
+
+for example, the index.html,
+
+CloudFront is going to forward the request
+
+to a specific edge location, which will realize
+
+that the file is not in its cache anymore.
+
+Therefore, the edge location will do a request
+
+on your origin and get the updated and newer index.html.
+
+Hence, you've seen the value of cache invalidations.
+
+So, that's it.
+
+I hope you liked it and I will see you in the next lecture.
+
+# Cache Behaviors.
+
+So now let's talk about cache behaviors.
+
+The idea is that you may want to have different origin,
+
+different caches for different URL path patterns.
+
+For example, you want to have one specific cache behavior
+
+for all your JPEG images based on your origin web server.
+
+Or you may want to route different origins
+
+or origin groups based on the content type
+
+or the path pattern.
+
+For example, you're saying, hey, for /images/*
+
+just go to S3 for /api/*, go to my origin
+
+and for /* then go to my default origin.
+
+It's called also the default cache behavior.
+
+So in this example of CloudFront,
+
+we have two cache behaviors.
+
+The first one is /api/*
+
+which is sending us to our application load balancer origin.
+
+And then we have the /* that is the default cache behavior
+
+that is always /*.
+
+And you can redirect, for example,
+
+to an S3 bucket as an origin.
+
+And so the users based on the resource they will get out
+
+of CloudFront may be redirected
+
+into the first cache behavior or the second cache behavior.
+
+Now, when you add additional cache behaviors,
+
+the default cache behavior, which is always /*
+
+is always also going to be the last to be processed.
+
+So we're going to see whether or not
+
+there is a more specific match, and if not,
+
+then we revert back to the default cache behavior.
+
+So a use case for this, for example,
+
+would be how to gate access
+
+into an S3 bucket because we want to make sure
+
+that users are properly signed in through a sign in page.
+
+So the way we do it is that we define a cache behavior
+
+for /login and so the users who hit the /login page
+
+will be redirected to our EC2 instance.
+
+And the role of our EC2 instance
+
+is to generate CloudFront signed cookies.
+
+So these signed cookies are sent back to the user
+
+and the user will then use the signed cookies
+
+to be able to access our default cache behavior,
+
+which is any other URL, then /login
+
+and then access our S3 bucket files.
+
+And if the users are trying to access
+
+the default cache behavior
+
+without doing a login first, what we can do
+
+is that we can set up the cache behavior
+
+to only accept the request if signed cookies are present.
+
+Therefore, we can redirect
+
+to the /login page and we're good to go.
+
+So this is a very good use case.
+
+Another one of using different cache behaviors
+
+is to maximize cache hit.
+
+So for example, the static request may go into Amazon S3.
+
+Here we don't have any cache policy
+
+with any headers or session.
+
+We maximize the cache hit based on just the resource we hit.
+
+And then for dynamic, for example,
+
+for a REST HTTP server that is using a load balancer
+
+and EC2, you may want to cache based
+
+on the correct headers and cookies based
+
+on the cache policy you've defined as before.
+
+So hopefully that makes sense.
+
+I hope you liked it and I will see you in the next lecture.
+
+# Hands On.
+
+So let's have a look
+
+at the caching behavior of our platform distribution.
+
+And this is the behavior I want to look at.
+
+So as you can see, we have the default behavior.
+
+It's a star.
+
+We can edit this,
+
+and we cannot edit the path pattern
+
+because this is the default behavior.
+
+Now if you scroll down, as you can see,
+
+we have cache key and origin request that we can set.
+
+And so we have a cache policy that we can define,
+
+and then we have an origin request policy that's optional.
+
+So let's go into creating a cache policy.
+
+So I call this one DemoCachePolicy.
+
+And as we can see here,
+
+we have control over the time to live settings.
+
+So we can set the minimum TTL,
+
+the maximum TTL, and the default TTL.
+
+And here we can have the cache key settings.
+
+So which headers do we want to include?
+
+And we can choose the headers from this list,
+
+or even add a custom header if we wanted to.
+
+Which query strings do we want to include?
+
+So all, or just maybe again,
+
+a list of query strings that we can add over here.
+
+And which cookies do we want to include?
+
+Again, all or a specified list.
+
+So here we can really specify what goes into our cache key.
+
+And then we know that data is going to be cached
+
+based on these settings for headers,
+
+query strings, and cookies.
+
+And we know for a fact that
+
+if we do select a cache key with some headers and so on,
+
+they are going to be passed to our origin request.
+
+But on top of it,
+
+if we wanted to also have extra headers passed
+
+or extra query strings passed to our origin request,
+
+we could create an origin request policy.
+
+So you will here you create
+
+a DemoOriginPolicy request policy.
+
+And here again we can specify
+
+which headers do we want to add into the request.
+
+So we have the headers,
+
+we have the query string facilities, and we have cookies.
+
+And this is to enhance our own little request in here.
+
+So back into the platform configuration.
+
+This is where we have the control
+
+over the cache keys and the origin requests.
+
+And hopefully, that makes sense to you now.
+
+So let me cancel this.
+
+The other thing I can do is to create
+
+a new behavior to override this behavior.
+
+So as you can see, I create a new behavior,
+
+and here I can say for /images/*,
+
+I want to send to a new origin.
+
+And of course you could define another S3 bucket
+
+as an origin or an EC2 instance,
+
+or whatever you want really.
+
+And again, you can have a specific cache key
+
+and origin request policy for this.
+
+And so your two cache behaviors will coexist.
+
+And, of course, the most specific is going
+
+to be the one that is going to be selected first.
+
+So here we have seen
+
+how to set up a behavior or multiple behaviors,
+
+and next we're going to have a look at invalidations.
+
+So first, let's observe the TTL setting
+
+by having this index.html file.
+
+And we're going to add some text to the title.
+
+Maybe I will add it, so let's go into index.html
+
+and it says instead of, "I really love coffee,"
+
+I say, "I really love coffee every morning."
+
+Okay, so we have updated this index.html file.
+
+What we're going to do now is to go into our S3 bucket,
+
+and we're going to upload a new version of that file.
+
+So because we haven't enabled versioning,
+
+actually this is going to replace that file.
+
+So we are uploading this index.html file here, upload.
+
+Now the upload has been succeeded.
+
+So if we click on this index.html and click on open,
+
+this is a opening directly from Amazon S3.
+
+So we get "I really love coffee every morning,"
+
+so we are getting the updated file directly into Amazon S3,
+
+but if we go into CloudFront and refresh this page,
+
+we're still getting just, "I really love coffee."
+
+The reason is CloudFront knows
+
+to cache the previous version for one day,
+
+and therefore CloudFront is not going to request
+
+from Amazon S3 this new file,
+
+"I really love coffee every morning."
+
+So how can we tell CloudFront
+
+to actually force fetching this new file version.
+
+Well, we go back into CloudFront,
+
+and we are going to go into the invalidations tab
+
+We're going to create an invalidation,
+
+and we'll just have a wild card, so a star.
+
+And this is going to say any object
+
+within the CloudFront cache should be removed.
+
+And then new objects are going
+
+to be fetched directly from Amazon S3.
+
+So let's go ahead and create this invalidation.
+
+So we can just do slash and then the star.
+
+Let's create this invalidation.
+
+And now that the invalidation is completed,
+
+what's going to happen is that if I go back
+
+to my CloudFront URL and refresh this,
+
+I'm gonna get, "I really love coffee every morning"
+
+because now the file has been
+
+correctly fetched from Amazon S3.
+
+So this shows you a demonstration
+
+of caching and invalidations.
+
+I hope you like this lecture,
+
+and I will see you in the next lecture.
