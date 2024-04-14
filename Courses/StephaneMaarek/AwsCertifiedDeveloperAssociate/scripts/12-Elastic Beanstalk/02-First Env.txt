@@ -1,0 +1,409 @@
+Okay, so let's go ahead
+
+and practice using the Beanstalk service.
+
+So I'm gonna go into the Elastic Beanstalk console,
+
+and we're going to create our first application.
+
+So we have an option to choose
+
+either a web server environment or a worker environment.
+
+So right now, we want to run a website
+
+so we'll choose web server environment,
+
+but if you wanted to process tasks off of a queue,
+
+then we would choose a worker environment
+
+but we will only do web server.
+
+So let's create an application,
+
+and this one is called MyApplication, okay.
+
+So next, we scroll down and we have environment information.
+
+So the environment is auto-filled,
+
+but I'm just going to call this one MyApplication-dev
+
+because this is going to represent
+
+my development environment.
+
+The domain name is going to be automatically generated
+
+for my application,
+
+and this is how I will access my web servers.
+
+Okay, so we scroll down
+
+and now we need to choose a platform.
+
+So this platform is going to be managed
+
+and I will choose Node.js,
+
+and then I will just choose the default options.
+
+You may see something different than me
+
+but by using the latest default,
+
+you should be fine and good to go.
+
+Next, we need to choose some application code.
+
+So we'll use a sample application,
+
+we can definitely upload our own code
+
+but we don't have that right now.
+
+And so, this sample application
+
+will be matching the environment I have right here.
+
+Okay, so let's scroll down, we have presets,
+
+and Beanstalk can be quite complicated
+
+for the configuration and as such,
+
+we can set recommended values
+
+for either a single instance, which is free tier eligible,
+
+or high availability, where we have a load balancer,
+
+for example, or custom configuration
+
+if you wanted to customize everything.
+
+Now to keep things simple,
+
+we're going to go over single instance.
+
+So we click on Next,
+
+and next we have a tricky bit,
+
+we need to configure the service access.
+
+So it's the IAM roles that will allow Beanstalk
+
+to do what it needs to do.
+
+So it's very simple,
+
+we can just go ahead and create a new service role,
+
+and this will create the Elastic Beanstalk service role.
+
+Now, I think that right now this is a new console
+
+so there may be a bug, and this is not prefilled
+
+so we need to go ahead and create manually
+
+the EC2 instance profile.
+
+So as such, I'm gonna go into the IAM console,
+
+and on the left hand side,
+
+I will go into Roles and I will create a role.
+
+And it's for a service, it's for EC2, you click on Next.
+
+Then, for permissions policy, you just filter
+
+and you type in Beanstalk
+
+and you need to add the web tier,
+
+the worker tier, and the multi container docker.
+
+This should be enough to get started.
+
+So we click on Next, and then for the role name,
+
+enter AWS, then Elastic Beanstalk EC2 role
+
+with hyphens in between.
+
+Okay, so now we go ahead and we create this role
+
+And this role right here
+
+is going to be the one we're using in Beanstalk.
+
+So I'll go back here, I refresh this,
+
+and as you can see, it got prefilled,
+
+so the Elastic Beanstalk EC2 role.
+
+So once you've done that, you're good to go.
+
+If you clicked on Next,
+
+you would have to go over networking and database
+
+and instance traffic scaling, all these kind of things,
+
+but they're optional.
+
+And right now, the thing we're going to do
+
+is just click on Skip to review,
+
+because we just wanna use the defaults that were set
+
+for the single instance mode.
+
+So make sure under Service Access
+
+that you do have the service role
+
+and the EC2 instance profile selected.
+
+And when you're good to go,
+
+you can definitely look at those, but they're complicated.
+
+Click on Submit, and this will go
+
+and create our first Beanstalk environment.
+
+So now if we scroll down under Events,
+
+as we can see, some events are happening
+
+and these events actually come from a service
+
+called CloudFormation.
+
+So if you go into the CloudFormation console,
+
+we have a look that indeed there is a stack created
+
+that has been created by Beanstalk,
+
+and this service, CloudFormation,
+
+is allowing us to create resources behind the scenes.
+
+So I won't go over too much of it, but like as you can see,
+
+events describe how the CloudFormation template
+
+is being created.
+
+And if you go under Templates,
+
+this is the template that generated our application,
+
+and View in Designer,
+
+we actually have the option
+
+to view the kind of architecture
+
+that is being created by CloudFormation.
+
+As we can see, we have an auto scanner group,
+
+a security group, a launch template, an Elastic IP,
+
+and a few more things called weight conditions.
+
+So I don't want to linger too much over it,
+
+but the idea is that all the resources
+
+that Beanstalk wants to create are actually created
+
+behind the scenes by CloudFormation.
+
+So in the Events tab, as we can see now,
+
+we have some information, for example,
+
+a security group was created
+
+and then an Elastic IP was created.
+
+Then we wait for the EC2 instances to launch,
+
+and then the instances will be created.
+
+So if I switch now and I go under EC2, the EC2 console,
+
+and look at my instances running, actually yes,
+
+one of my instances is running,
+
+it's using a T3 micro.
+
+And as we can see,
+
+this instance has a public IP address right here.
+
+And if I go on the left hand side under Elastic IPs,
+
+we can see that this Elastic IP address was created
+
+and is allocated to our EC2 instance.
+
+And if I go under Auto Scaling groups,
+
+we can see that an auto scaling group was created,
+
+and this auto scaling group, under Instance Management,
+
+is managing my only EC2 instance,
+
+that's why it's called a single EC2 instance.
+
+So all of this makes sense
+
+and that's why Beanstalk is created.
+
+And at the end of it,
+
+when everything is launched, you'll say, okay,
+
+successfully launched and it will be Ok for Health.
+
+And what we get out of it is a domain name.
+
+So if I click on this domain name
+
+and open it in a new tab,
+
+I get actually access to my Beanstalk environment
+
+and my single EC2 instance.
+
+And it says, "Congratulations,
+
+you are now running Elastic Beanstalk
+
+on this EC2 instance," which is amazing.
+
+So as you can see, very simply,
+
+Beanstalk was creating for us, just from the code,
+
+the sample code that we were using,
+
+it generated all the infrastructure
+
+to start successfully my application, my web server,
+
+which is very, very good.
+
+So now, let's have a look at a couple of options.
+
+So if we wanted to upload a new version, we click on here,
+
+we could upload a new version
+
+and automatically it would be deployed to my EC2 instances.
+
+So we don't have that, but just to give you an overview,
+
+health gives you some information
+
+around the health checks of all your instances,
+
+if you had many.
+
+You can go under Logs to view the logs of your application.
+
+You can go under Monitoring
+
+to have a look at all the metrics for your application,
+
+so we get really like some view centric
+
+around all my application itself.
+
+The alarms, manage updates,
+
+which is when Beanstalk decide to update
+
+our entire environment.
+
+And then, if you click on Configuration,
+
+you can actually have a look at all the configuration
+
+of your Beanstalk environments, modify them and apply them,
+
+which are quite, quite well rounded
+
+but we don't need to know about this right now.
+
+Now, more importantly, if we go under MyApplication,
+
+as we can see right here, there is MyApplication-dev,
+
+that's one environment,
+
+but I could go ahead and create a second environment,
+
+for example, MyApplication-prod,
+
+and that will allow us
+
+to really think about environments overall.
+
+So that's it for an overview of Beanstalk.
+
+So to reason about it,
+
+Beanstalk is centered around code
+
+and environments for your code,
+
+whereas if you wanted to look at CloudFormation,
+
+the service we had seen before,
+
+CloudFormation is used to deploy stacks arbitrarily
+
+with any kind of infrastructure.
+
+So we've seen all that Beanstalk has created,
+
+including my auto scanning group,
+
+my EC2 instance, the Elastic IP, and so on.
+
+And so, if you are in a course
+
+that has more Beanstalk lectures,
+
+such as, for example, the Certified Developer course,
+
+then do not delete your application, we'll be using it more.
+
+But if you are done with the Beanstalk lectures,
+
+you've known enough for the exam.
+
+So what you can do is take your application, do Action,
+
+and then Delete application,
+
+and then you will have cleaned up.
+
+So that's it, make your own call
+
+and I will see you in the next lecture.

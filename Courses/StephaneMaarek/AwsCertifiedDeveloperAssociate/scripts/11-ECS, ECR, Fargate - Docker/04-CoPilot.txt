@@ -1,0 +1,677 @@
+So now let's talk about AWS Copilot.
+
+So Copilot is not a service,
+
+it's a command line interface tool that is going to be used
+
+to build, release and operate
+
+production-ready containerized applications.
+
+The idea is that we want to remove the difficulty
+
+of running apps on AppRunner, ECS and Fargate,
+
+by just using a CLI tool to deploy to these environments.
+
+So it helps you focus on building the app
+
+rather than setting up the infrastructure
+
+and all the complexity of the infrastructure
+
+such as ECS, VPC, ELB, ECR, and so on,
+
+is done for you by Copilot.
+
+On top of it, if you wanted to integrate it
+
+with CodePipeline you could,
+
+and that will give you automated container deployments
+
+using only one command.
+
+You can also deploy to multiple environments using Copilot.
+
+You're going to get troubleshooting, logs,
+
+and health status of your application.
+
+Use the CLI or YAML file to describe the architecture
+
+of your applications in the Microservice way.
+
+Then you will use the Copilot CLI
+
+to containerize your applications and deploy them.
+
+And then you're going to get
+
+a well-architected infrastructure setup
+
+that's going to be right-sized and scale automatically.
+
+You can get a deployment pipeline,
+
+and you can get effective operations and troubleshooting.
+
+And as a summary, you can deploy
+
+either to Amazon ECS or AWS Fargate or AWS App Runner.
+
+Okay, that's it for this lecture.
+
+I hope you liked it,
+
+and I will see you in the next lecture.
+
+Okay, so we're going to practice Copilot
+
+and for this I'm going to follow a tutorial at this URL.
+
+So just open copilot, links.txt, and this will get you
+
+to this URL right here, where we're going to deploy an app
+
+and then clean up resources.
+
+Just so you know,
+
+running this tutorial may cost you a little bit of money,
+
+so if you wanna remain within the free tier
+
+you can just have a look at what I do, but just watch.
+
+Okay, so to launch this cloud, this Copilot CLI
+
+I'm going to use Cloud9
+
+because it's going to give me a CLI
+
+in which I can run Docker.
+
+So for this I'm going to go and open Cloud9,
+
+then create an environment, and I'll call DemoCloud9.
+
+And we're going to use a new EC2 instance of t2.micro
+
+which is free tier eligible.
+
+We'll use Amazon Linux 2, a timeout of 30 minutes,
+
+that we'll make sure to clean up.
+
+How do we want to access?
+
+We'll use a Systems Manager, this is good.
+
+And then we'll create this.
+
+So my Cloud9 environment is now created.
+
+I can just click here to open it, and from there
+
+I will be able to install the Copilot CLI and the Docker.
+
+Okay, so we're going to run some commands
+
+and I'm going to use my terminal for this.
+
+So let's clear this and have a look.
+
+So we are going to first install the Copilot CLI,
+
+so you can verify whether or not it's installed
+
+by just typing copilot.
+
+And as you can see right now, the command is not found.
+
+So to do so, I'm going to use this command right here,
+
+the first one, to install Copilot.
+
+So let's press Enter.
+
+And has been installed.
+
+And if I now do copilot --version,
+
+as you can see it says copilot version 1.25.
+
+So that's perfect, it's installed.
+
+Next we need to make sure Docker is installed,
+
+but if I just type Docker, as you can see,
+
+it has been installed and is running already,
+
+so that's perfect for me.
+
+I don't need to do any kind of setup.
+
+Next, we need to actually clone a repository
+
+that contains a sample and that sample contains Copilot.
+
+So we're going to paste this in and clone this.
+
+And then we do cd example/
+
+And as you can see, we can see in Cloud9
+
+that's my example, dock, folder has been replicated.
+
+And in it we'll find a Docker file.
+
+And this is why we need to install Docker
+
+because this Docker file
+
+actually creates an nginx type of container
+
+and copies index.html in it.
+
+So we create a specified Docker container.
+
+And this HTML will contain some, little bit of text
+
+about the Copilot CLI.
+
+Okay, so that's perfect.
+
+So let's go back in here.
+
+And what we need to do now,
+
+is to actually initialize Copilot.
+
+So make sure you are in the example directory,
+
+which I am right now.
+
+I'm going to clear this
+
+and then we do copilot init.
+
+So this is the Copilot CLI
+
+and it's going to give us some questions.
+
+And with it we're going to be able to set up
+
+a containerized application on AWS.
+
+So the cool thing is that, as you can see,
+
+there's not much knowledge needed from AWS
+
+to be able to run with copilots.
+
+So the first question to answer is,
+
+what is the name of your application?
+
+And I will enter just as in the tutorial
+
+on the right hand side, so it's copilot-guide.
+
+Next, what is the kind of application you want to run
+
+for the workload?
+
+Is it a request-driven web service for App Runner?
+
+Is it a load balanced web service
+
+for the internet to ECS to Fargate?
+
+Or is it just a back-end service with ECS on Fargate?
+
+Is it a worker service to have an event queue
+
+to ECS on Fargate?
+
+Or is it a scheduled job?
+
+And right now, what I want
+
+is to have a load balanced web service.
+
+But as you can see, based on our selection,
+
+we'll have different types of architecture,
+
+but all of this is handled by Copilot,
+
+which is pretty cool.
+
+So we have a load balance web service
+
+and how do we want to name the service?
+
+I will name it web-app.
+
+Okay, so which Docker file would you like to use for this?
+
+And there's a Docker file right here.
+
+So we can just enter ./Dockerfile and we're good to go.
+
+So it says,
+
+"Ok great, we'll set up a Load Balanced Web Service
+
+"named web-app in the application co-pilot-guide
+
+"listening on port 80."
+
+So it detected already the port and so on.
+
+So now it's actually creating my infrastructure.
+
+And as you can see, it's using CloudFormation.
+
+And so if I go into my management Console
+
+and now open CloudFormation.
+
+Let's have a look.
+
+As you can see,
+
+there is a copilot-guide-infrastructure-roles
+
+and other types of things that is going to be created
+
+by Copilot.
+
+So now all I have to do is to wait a little bit.
+
+So now we're all set for local development
+
+and it has created a manifest file
+
+at copilot/web-app/manifest.yml
+
+which contains a little bit of configuration
+
+around our name, our type, as well as the HTTP path
+
+we wanna match on, the image, Docker file, the port,
+
+the CPU, memory, and so on.
+
+And we could modify this if you wanted to modify
+
+how we're going to deploy our application.
+
+So we'll have one more question.
+
+This is, do we want to deploy a test environment?
+
+And actually, going to say no,
+
+because we don't need a test environment.
+
+Okay, so now we're set and what we're going to do now
+
+is to create an environment to run our application in.
+
+So for this, we run this copilot env init
+
+and then we'll paste this in.
+
+So the name is prod and the profile is default,
+
+which means it's going to use the default credentials
+
+that I have on my Cloud9.
+
+So let's clear this and paste this in.
+
+And so what I have to do is to create one more file.
+
+So you just copy this right here, you do touch,
+
+and then this, which is going to create a file.
+
+And now you try again the same command.
+
+And now this is going through.
+
+So it says, okay,
+
+"Would you like to use the default configuration
+
+for new environment?" which is a new VPC
+
+with two AZs, two public subnets and two private subnets,
+
+with a new ECS cluster and new IAM roles.
+
+Yes, use defaults.
+
+But for example, you could also if you wanted to,
+
+configure the default resources
+
+or import existing resources, for example,
+
+leverage an existing VPC or existing subnets,
+
+but for now we'll just use the defaults.
+
+So we'll press Enter
+
+and now there is a new manifest files that get written
+
+in environments and then prod.
+
+Okay?
+
+And now it's going to update all the resources
+
+with CloudFormation again.
+
+So let's wait a little bit,
+
+and if we have a look in CloudFormation
+
+and refresh our stack now we actually are creating
+
+all the infrastructure from within the CloudFormation,
+
+and this is quite a lot of things.
+
+So let's wait for everything to be over
+
+and then we'll get back to what has been created.
+
+So now it's been deployed for the base infrastructure.
+
+And if I go back into CloudFormation
+
+and have a look at this stack,
+
+so let me just have a look at this stack right here.
+
+I'm going to fold this folder and we look at resources,
+
+we can see that an ECR repository was created,
+
+KMS key was created, an S3 bucket was created,
+
+as well as an S3 bucket policy, which is very handy.
+
+So next what we have to do is to actually go ahead
+
+and provision our application.
+
+So for this, let's scroll down and we're going to say,
+
+"Okay, everything looks good."
+
+Now we need to run a copilot env deploy names equal prod.
+
+So let's do it.
+
+So I just copy the command from right here,
+
+which I know will work.
+
+So let's do this.
+
+And this is going to deploy our application to Copilot.
+
+And now we have an InvalidClientTokenId.
+
+So to resolve this, I don't love it,
+
+but this is a restriction of Cloud9.
+
+We have to generate some credentials
+
+and import them into our Cloud9 environments.
+
+So first things first,
+
+let's go into Cloud9 and preferences.
+
+And then I will scroll down
+
+and I will find on the left-hand side the AWS settings.
+
+And then you're going to disable
+
+the AWS managed temporary credentials
+
+because this is what is limiting us.
+
+Next you're gonna go into IAM
+
+and we'll create a super user that we'll delete right after.
+
+So get into the users, then you add a user,
+
+and it's gonna be demo-copilot.
+
+The only thing we want to do is to provision,
+
+so we'll say it's an admin, so it has administrator access.
+
+And then we create this user.
+
+We click on it, review the user,
+
+and we're going to actually go under Security credentials
+
+and we create access keys.
+
+And this is for the CLI, so that's perfect.
+
+Yes, I understand this.
+
+Click on Next, Create access key.
+
+And now we have the access key here.
+
+So I'm going to type in again, aws configure,
+
+then the access key ID copy,
+
+and the private access key is right here,
+
+the secret access key.
+
+I copy it as well and I paste it here.
+
+Okay, so now we should have given enough permissions
+
+to Cloud9 to do its thing.
+
+So let's clear this.
+
+And I'm going to redeploy my application in prod.
+
+So we're going to export the region
+
+because we haven't configured the region.
+
+So let's actually then configure again, Enter, Enter.
+
+The default region name
+
+is going to be the one I am in right now,
+
+which is Frankfurt, so eu-central-1.
+
+So eu-central-1. Perfect.
+
+And the default output format is json.
+
+Okay, so let's run one more time this command.
+
+And now as you can see, it is working.
+
+So now it's actually creating the infrastructure
+
+for our prod environment.
+
+So it's going to create an ECS cluster for us,
+
+a security group, an internet gateway,
+
+some private subnets, root tables, and so on.
+
+So let's wait until everything is created.
+
+And now all the infrastructure is created.
+
+So if I go into CloudFormation
+
+I should see if I go under ECS, excuse me,
+
+I should be seeing what I want to see
+
+which is our prod cluster that is created from Copilot.
+
+But you can see no services are running on it yet.
+
+That's because we need to deploy our service.
+
+So for this, let's just run copilot deploy, press Enter.
+
+And now it's going to say,
+
+"Hey, I found that you've one web-app
+
+"and I found one environment.
+
+"So I'm going to deploy your web-app to prod."
+
+So now it goes ahead and uses Docker to actually build
+
+our final Docker image.
+
+Then it pushes that Docker image into ECR,
+
+and then from ECR is going to create
+
+an ECS service that will be referencing that image,
+
+and will be started on our ECS cluster.
+
+So finally it took a bit of time, but it's done.
+
+And what we see is that we have an ECS test definition,
+
+an IAM role, we have an ECS service,
+
+CloudWatch log group, an HTTP listener,
+
+we have the load balancer with, and so on,
+
+that have been created.
+
+And all the complexity of thinking
+
+about what you need to actually create
+
+when you run an application on ECS
+
+is taken away by Copilot.
+
+So now if we go under CloudFormation, we see more stacks.
+
+But if we go under ECS, now we see a service,
+
+called the copilot-guide-prod service,
+
+we see that one task is running in the service.
+
+We can see also that it's linked to a load balancer.
+
+So if I click on the load balancer name
+
+I'm able to access it and there's the DNS name
+
+of my load balancer.
+
+So now I can just open a new page,
+
+and here we go, accessing the load balancer.
+
+And I have my copilot container running,
+
+that just says AWS Copilot.
+
+But at least all the infrastructure has been been deployed
+
+by Copilot.
+
+And even though it was pretty long,
+
+I would say it took away all of the complexity,
+
+which is nice because it can be very, very complicated
+
+to configure everything perfectly,
+
+but Copilot does it for you.
+
+And again, what you need to remember
+
+is that these manifest.yml files really allow you
+
+to fine tune how you want the deployment to happen
+
+in prod and by environment, and so on.
+
+So have a look at these files as well.
+
+When you are done, then comes the fun part of cleaning up.
+
+So to clean up, very simply,
+
+you're going to run one command called copilot app delete,
+
+and copilot app delete is going to delete
+
+your entire application.
+
+So that's good to get started.
+
+Now wait for everything to be deleted,
+
+and then you can move on to the next phase of your deletion.
+
+Other things you need to be able to delete
+
+is your user and your access keys.
+
+So let's continue.
+
+I'm going to go ahead and actually just simply delete
+
+this user, which is going to invalidate as well
+
+any type of access keys that was attached to the user.
+
+And now let's clean up our Cloud9 environments.
+
+So you go under Cloud9 and you just simply delete it.
+
+You type Delete to agree, and you're good to go.
+
+And that's it.
+
+You've done the tutorial,
+
+you've practiced using the Copilot CLI.
+
+I hope you liked it, and I will see you in the next lecture.
