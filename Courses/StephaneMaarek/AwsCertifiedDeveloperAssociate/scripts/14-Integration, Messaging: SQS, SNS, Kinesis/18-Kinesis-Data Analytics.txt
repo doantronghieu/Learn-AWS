@@ -1,0 +1,183 @@
+So now let's talk about
+
+Kinesis Data Analytics.
+
+And there are two flavors of it.
+
+There is the first one for SQL applications,
+
+and the second one for Apache Flink.
+
+So let's first talk about the first kind,
+
+which is Kinesis Data Analytics for SQL Applications.
+
+So it sits in the center.
+
+And the two data sources that it's able to read from
+
+are Kinesis Data Streams and Kinesis Data Firehose.
+
+So you can read from either of those,
+
+and then you can apply SQL statements
+
+to perform your real-time analytics.
+
+It's also possible for you to join some reference data
+
+by referencing it from an Amazon S3 bucket.
+
+This will, for example,
+
+allow you to enrich the data in real-time.
+
+Then you can send data to various destinations,
+
+and there are two of them.
+
+The first one is a Kinesis data stream.
+
+So you can create a stream
+
+out of a Kinesis Data Analytics real-time query,
+
+or you can send it directly into Kinesis Data Firehose,
+
+each with their own use cases.
+
+If you send directly into Kinesis Data Firehose,
+
+then you can send into Amazon S3, Amazon Redshift,
+
+or Amazon OpenSearch, or any other Firehose destinations.
+
+Whereas if you send it into a Kinesis data stream,
+
+you can do real-time processing of that stream of data
+
+using AWS Lambda
+
+or whatever applications you are running on EC2 instances.
+
+So remember this diagram,
+
+this is for Kinesis Data Analytics for SQL Applications.
+
+Now, if we go into the details, as I said,
+
+the two sources are only Kinesis Data Streams and Firehose.
+
+You can enrich using data from Amazon S3.
+
+It's a fully managed service,
+
+you don't provision any servers.
+
+There is automatic scaling,
+
+and you actually pay for
+
+whatever goes through Kinesis Data Analytics.
+
+In terms of output, as I said,
+
+you can go into Kinesis Data Streams
+
+or Kinesis Data Firehose.
+
+And the use cases would be to do time-series analytics,
+
+real-time dashboards, or real-time metrics.
+
+So that's for the first kind of Kinesis Data Analytics.
+
+The second one is Kinesis Data Analytics for Apache Flink.
+
+So as the name indicates,
+
+you can use actually Apache Flink on the service.
+
+And so if you use Flink,
+
+you can write your application
+
+using Java, Scala, or even SQL
+
+to process and analyze streaming data.
+
+So you may say, "Well, that's
+
+the same thing, isn't it, from before?"
+
+And it's not.
+
+So Flink are special applications you need to write as code.
+
+And what it allows you is that
+
+you can actually run these Flink applications
+
+on the cluster that's dedicated to it
+
+on Kinesis Data Analytics.
+
+But it's all behind the scenes.
+
+And with Apache Flink,
+
+you can read from two main data sources,
+
+you can read from Kinesis Data Streams or Amazon MSK.
+
+So with this service,
+
+you run any Flink application on a managed cluster on AWS.
+
+And the idea is that
+
+Flink is going to be a lot more powerful
+
+than just standard SQL.
+
+So if you need advanced querying capability,
+
+or to read streaming data from other services
+
+such as Kinesis Data Streams or Amazon MSK,
+
+which is managed Kafka on AWS,
+
+then you would use this service.
+
+So with this service,
+
+you get automatic provisioning of compute resources,
+
+parallel computation, and automatic scaling.
+
+You get application backups,
+
+they're implemented as checkpoints and snapshots.
+
+You can use any of the Apache Flink programming features.
+
+And just so you know,
+
+with Flink you can only read
+
+from Kinesis Data Streams and Amazon MSK.
+
+You cannot read from Kinesis Data Firehose.
+
+If you need to read and do real-time analytics
+
+on Kinesis Data Firehose,
+
+then you must use Kinesis Data Analytics for SQL.
+
+Okay, so that's it for this lecture.
+
+I hope you liked it.
+
+And I will see you in the next lecture.

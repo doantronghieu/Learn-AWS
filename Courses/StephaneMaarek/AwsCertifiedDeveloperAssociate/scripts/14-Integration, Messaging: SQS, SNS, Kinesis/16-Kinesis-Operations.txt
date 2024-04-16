@@ -1,0 +1,119 @@
+So just a short lecture
+
+on how to scale Kinesis
+
+and for this, we talk about
+
+Shard Splitting and Shard Merging.
+
+So Shard Splitting is used to split a shard into two.
+
+So that means we have more shards
+
+and so it's used to increase the Stream capacity.
+
+So if we add more shards by splitting a shard
+
+we get an extra one megabyte
+
+per second of throughput per shot.
+
+So it's used for example,
+
+when you want to divide a hot shard,
+
+for example, Shard two is very hot,
+
+a lot of data is sent to it.
+
+We're going to split the shard
+
+and we're gonna get shard four and five out of it
+
+and by having the new shards,
+
+we've increased our stream throughput from three megabytes
+
+per second to four megabytes per second.
+
+So we've increased the capacity of course
+
+but because we are being built in terms
+
+of how many shards we have in our stream
+
+we've also increased the cost of our Kinesis Data Stream .
+
+The old shard is going to be closed
+
+or Shard two will not be written two anymore
+
+and the old data will be expired after some time.
+
+So depending on what your retention period is
+
+between one to 365 days, you will have to wait this long.
+
+Then the data is expired
+
+and then finally, the shard will be deleted.
+
+There is no auto-scaling in Kinesis Data Streams
+
+although you can find a way to create your own auto-scaling
+
+and there is a solution architecture for that
+
+but there's no setting to do auto-scaling
+
+with Kinesis Data Streams and so it is
+
+for you to manually increase or decrease capacity.
+
+And you cannot split a shard into more than two
+
+shards in a single operation.
+
+If you wanted to do so,
+
+you will need to do many different Shards Splitting.
+
+Now the opposite operation of
+
+Shard Splitting is Merging Shards .
+
+So you realize that you want to decrease
+
+from capacity and save costs.
+
+In this case, you can group two shards
+
+that have low traffic so cold shards
+
+and you're going to merge them together into a new shard.
+
+So in this example, Shard one
+
+and four are merged into Shard six
+
+and this is used to decrease capacity and the cost.
+
+Then the old shard again, will be closed for rights
+
+and they will be deleted once the data has expired
+
+within the shards.
+
+You can not emerge more
+
+than two shards in a single operation
+
+and with Shard Splitting and Shards Merging
+
+you've seen how to scale up and down Kinesis.
+
+That's it, that's all you need to know.
+
+I hope you liked this lecture
+
+and I will see you in the next lecture.

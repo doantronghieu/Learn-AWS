@@ -1,0 +1,755 @@
+# Overview.
+
+So now let's talk about Amazon EventBridge,
+
+and Amazon EventBridge used to be formally known
+
+as CloudWatch Events so you will see EventBridge
+
+in the exam, but just so you know,
+
+if you come from old AWS experience,
+
+then it used to be named the CloudWatch Events.
+
+So with EventBridge, you can do a lot of things.
+
+For example, we can schedule cron jobs in the Cloud,
+
+so we can schedule scripts.
+
+For example, we say, "Hey, every hour please trigger
+
+a Lambda function,"
+
+and that Lambda function will run a script.
+
+So the events are generated every hour,
+
+hence the name Amazon EventBridge,
+
+but not just a schedule like every hour,
+
+it can also react to an event pattern.
+
+So there are event rules that can react
+
+to a service doing something.
+
+For example, you can react to the event
+
+of IAM root user sign in in the console.
+
+So when that happens, maybe you want to send a message
+
+into an SNS topic and receive an email notification,
+
+so that if anyone is using the root account,
+
+then you will receive an email,
+
+which may be a good security feature for your accounts.
+
+Also, for example, you have different destinations,
+
+you can trigger Lambda functions,
+
+send SNS and SQS messages, and so on,
+
+I will show you this all in a second.
+
+So EventBridge sits in the middle
+
+and we have all the sources that can send events
+
+into Amazon EventBridge.
+
+So for example, EC2 instances when they start,
+
+when they're stop, when they're terminated, and so on.
+
+Code Build, for example,
+
+if you have a build that fails
+
+or S3, whenever there's an event, for example,
+
+when an object is uploaded,
+
+or Trusted Advisor when you have a new finding
+
+of security in your accounts
+
+or as a good combo, you can combine EventBridge
+
+and CloudTrail and actually intercept any API call made
+
+within your AWS accounts, which is huge.
+
+Also, as I said, you can have a schedule or a cron,
+
+so you can say every four hours or every Monday at 8:00 am,
+
+the first Monday of the month,
+
+this is something you can do as well.
+
+Then these events get sent into Amazon EventBridge
+
+and you can set up a filter.
+
+For example, you say, "Hey, I only want these events
+
+for a specific bucket," for Amazon is free, for example.
+
+Then EventBridge is going to generate adjacent document
+
+that represents the details about your events.
+
+So which instance, for example, gets started,
+
+whether its ID, and so on.
+
+A lot of information, the time, the IP, and so on.
+
+So once this is done, then this JSON document, this event,
+
+can be sent into so many kind of different destinations,
+
+allowing you to do really awesome integrations.
+
+For example, you can schedule and trigger a Lambda function,
+
+you can schedule a batch in AWS Batch,
+
+you can launch an ECS task for Amazon ECS,
+
+you can send a message to SQS, to SNS,
+
+or even to a Kinesis Data Stream,
+
+you can, for example, start a Step Function,
+
+you can start a CI/CD Pipeline with CodePipeline
+
+or a build with CodeBuild so you don't actually know
+
+all these things, of course,
+
+these are different AWS services,
+
+but I'm just giving you an overview what you can do
+
+and you can also, for example, start an SSM automation
+
+or a specific EC2 action, such as starting or stopping
+
+or restarting an EC2 instance.
+
+So you can see the possibilities are endless
+
+and it really depends on what is your use case.
+
+So Amazon EventBridge is what we call
+
+the default event bus, which is what we just saw,
+
+which represents services from AWS
+
+that send their events into the default event bus,
+
+but Amazon EventBridge has more capability.
+
+There is something called the partner event bus
+
+and this is AWS that has integrated with partners,
+
+most likely they are going to be software
+
+as a service partners and they are going
+
+to send their events directly into your partner event bus.
+
+So if you're using, for example, Zendesk, Datadog, Auth0,
+
+or others, you need to check the partner list.
+
+Then there's a chance
+
+that they can send their events directly
+
+into a specified partner event bus
+
+and so you can react to changes happening outside
+
+of AWS directly in your accounts.
+
+Okay, and finally, there is a custom event bus
+
+so you can create your own event buses
+
+and then your own applications can send their own events
+
+into a custom event bus and therefore, you have
+
+the same capability of sending these events
+
+to different destinations thanks to the EventBridge rules.
+
+Also, you can access event buses, cross accounts,
+
+using resource based policies as we'll see very soon.
+
+You can also archive events so all of them
+
+or just a subset event to a filter
+
+and by archiving the events,
+
+you can set it to be either indefinite retention
+
+or a set period for retention, okay?
+
+What you can do with these is that you can replay
+
+these archived events.
+
+For example, say there is a bug in your Lambda function
+
+and you want to fix it, so you fixed it
+
+and then you want to retest the event, replay it,
+
+then you can replay these archived events,
+
+which is super handy for debugging,
+
+super handy for troubleshooting,
+
+and for fixing production as well.
+
+Now, EventBridge receives a lot of events
+
+from different places and so therefore,
+
+you need to understand what the events are going
+
+to look like and remember, these events are
+
+in this adjacent format we just saw.
+
+So therefore, there is a Schema Registry
+
+and the capability is that EventBridge is going
+
+to analyze the events in your bus
+
+and then it's going to infer the schema
+
+and the schema out of the Schema Registry is going
+
+to allow you to generate code for your application
+
+that will know in advance how the data is structured
+
+in the event bus.
+
+For example, this is an example here
+
+for a specific CodePipeline in action.
+
+There's a schema and you can download
+
+the code directly using the Orange button
+
+and this will know directly how to infer the schema
+
+and structure the data out of your event bus.
+
+Also, the schemas can be versioned
+
+so you can over time iterates between the schemas
+
+of your application, of course.
+
+Now, we have resource based policies for EventBridge,
+
+what does that mean?
+
+That means that you can manage permissions
+
+for a specific event bus.
+
+For example, you can say
+
+that a specific event bus can be allowed
+
+or denied other events from other regions or accounts
+
+and the use case for it, for example, would be
+
+to have a central events bus
+
+within your AWS organization,
+
+so a set of accounts and then all these events are going
+
+to be aggregated, so how does that work?
+
+Well, we have a central event bus with a specific account
+
+and we're going to add a specific resource based policy,
+
+allowing other accounts to send events to it
+
+and therefore, this other account, for example,
+
+will be able to do a put events
+
+and send events directly into the central event bus.
+
+So that's it, we've seen EventBridge left to right,
+
+you know everything about it.
+
+So remember, you can react to events happening
+
+within your accounts, thanks to the default event bus,
+
+but also partner events and also your own events
+
+with custom buses,
+
+you have the Schema Registry capability,
+
+and then you have resource based policies,
+
+which allow you to have a cross accounts, for example,
+
+capability for event buses.
+
+Okay, that's it, I hope you liked it
+
+and I will see you in the next lecture.
+
+# Hands On.
+
+Okay, so first let me show you
+
+the CloudWatch Events UI.
+
+So this is CloudWatch Events,
+
+and within CloudWatch, there's Events
+
+and it's going to go away at some point,
+
+so don't be surprised if you don't find it
+
+because now CloudWatch Events is EventBridge,
+
+which is the enhanced version of CloudWatch Events.
+
+So I can go into Amazon EventBridge and look at the new UI.
+
+So in here I get access to multiple things.
+
+So under Event buses,
+
+we have access here to the default event bus.
+
+And this event bus is the one that is created
+
+by default in your account.
+
+And you can already start defining rules on it.
+
+But you can create your own event bus,
+
+and call this one the central event bus,
+
+and I'm recreating, so V2.
+
+You can enable event archives if you wanted to,
+
+to archive these events and retain them forever
+
+in case you wanted to do some debugging,
+
+as well as do automated schema discovery.
+
+And if you needed to get cross-account access
+
+on this event bus, then you could define
+
+a resource-based policy and the templates would be here.
+
+To do so, you would need to edit everything.
+
+So if you don't have a resource-based policy,
+
+then only the event bus owner can send events
+
+to the event bus, which is fine for us.
+
+So let's create this,
+
+and you have created a custom event bus,
+
+and now we're good to go.
+
+So now let's talk about the events.
+
+So we have event sources that can come from partners.
+
+For example, here, we can say
+
+that I want to catch all the events coming from of Auth0.
+
+So we're going to set up
+
+and here is the way to set up your event bus for Auth0.
+
+So there are some instructions to read from
+
+on the Auth0 website.
+
+And then once everything is set up,
+
+then I'm able to catch the events
+
+from Auth0 directly within EventBridge.
+
+So now all the events are captured into EventBridge,
+
+and you need to go ahead and create some rules.
+
+So you need to select Create rule option,
+
+and I'll call this one DemoRuleEventBridge.
+
+And then we select the bus.
+
+So the bus could be default, could be central bus,
+
+or whatever you wanna create, right?
+
+So I'll use a default bus
+
+because it's the one created by default.
+
+And you could either run it on a schedule.
+
+For example, I say,
+
+"Hey, I want this rule to run every hour."
+
+And this could be a way to do a cron in the cloud,
+
+or I wanna run this rule
+
+whenever this specific event happens.
+
+So let's choose the first one.
+
+So next, we have to choose an event source.
+
+And we have a couple of options.
+
+Either we want to have the event source
+
+to be from within AWS, so we choose AWS services,
+
+or this is a custom event or a partner event,
+
+and we would choose Other.
+
+And if you wanted to centralize all your events
+
+in your accounts across accounts,
+
+then you would choose All events
+
+and then you will send that into a central event bus
+
+thanks to resource-based policy.
+
+But for now, we'll choose AWS services,
+
+and next we can filter for sample events.
+
+So this is a feature that is new
+
+and it's called the Sandbox.
+
+So if you go back into Amazon EventBridge
+
+and you go here to the Sandbox,
+
+you can actually test with sample events
+
+and then test against your event pattern
+
+without creating a rule.
+
+But these UI are accessible as well
+
+when you create a rule.
+
+So for sample events, I'm going to select EC2.
+
+And don't get fooled, there's auto scaling here,
+
+but you scroll down and now there's EC2.
+
+And you're going to go
+
+for EC2 State-change notification.
+
+And this is the kind of event
+
+that will get sent into EventBridge
+
+whenever there's a state-change notification.
+
+So we can choose different sample events.
+
+As you can see, this one,
+
+the instant state is in pending,
+
+and this one it's in running, okay?
+
+So let's assume we want to generate events
+
+whenever our instances go into V.
+
+Let's choose the stopping state
+
+because we wanna know whenever they've been stopped.
+
+Okay, stopped, here we go.
+
+So what I'm going to do is scroll down
+
+and create an event pattern.
+
+So I will choose a service provider which is EC2,
+
+and an event type
+
+which is the instance state-change notification.
+
+And we can have all states,
+
+and if I test the pattern right now
+
+is going to match the sample events.
+
+But I can specify a specific state.
+
+For example, only the instances
+
+that have been stopped or terminated.
+
+As you can see, my event pattern just got more granular.
+
+So if we test this right now
+
+is going to match what we had above, which is great.
+
+But if I choose for example, the pending
+
+or the running states and test the pattern again,
+
+it's not going to be cut.
+
+So we know for sure
+
+that the events we are catching right now
+
+are whenever an EC2 instance is stopped or terminated.
+
+Why do we do this?
+
+Well, maybe because whenever that happens
+
+we want to be notified.
+
+So the targets could be either an EventBridge event bus,
+
+which is when you wanna centralize destinations
+
+or an API destination, or you could choose
+
+one of the following AWS services.
+
+And you can see,
+
+you have a lot of possible targets or actions.
+
+But the one that's interesting to me is the SNS topic
+
+because I wanna send into my demo topic,
+
+a message whenever an EC2 instance is stopped or terminated.
+
+So I'll click on Next, Next, and then Review and create.
+
+Yes, my rule looks good.
+
+Let's create this rule.
+
+So now you could try it out
+
+and start to launch an EC2 instance and then terminate it
+
+or stop it and make sure you are subscribed
+
+into your SNS topic with your email,
+
+and then you would receive an email
+
+whenever, well, an instance is stopped or terminated,
+
+which I think is quite nice.
+
+So just to summarize, we have also the archives
+
+to find all the archives of your events, if you needed to,
+
+and the replays to replay events
+
+and put them back into an event bus
+
+to properly fix your integrations.
+
+Finally, you have the schema registry.
+
+So this is a way for you to look at the schema
+
+of these events.
+
+And so for example,
+
+we can look at the AWS event schema registry,
+
+and we type aws.ec2,
+
+and in here you can look at the AWS EC2,
+
+EC2's instant state-change notification.
+
+So it's version one, the schema type is OpenAPI 3.0,
+
+and this is the schema itself right here.
+
+And what this means is that it defines,
+
+well, the possibility of what goes into these events.
+
+So we can see, well, the ID is a string,
+
+the source is a string,
+
+the time is a string in format date-time, and so on.
+
+And this defines how things can be looking
+
+in your event itself.
+
+And thanks to this schema, which was quite complicated,
+
+you can actually download code bindings,
+
+and it's going to generate code for you
+
+for example, in Java, in Python,
+
+in TypeScript or in Go
+
+so that you can manipulate these objects
+
+in a much easier fashion
+
+in your code without writing some manual code for you.
+
+Okay, so that's it for EventBridge.
+
+As you can see, it's a very complete service
+
+with a lot of different features,
+
+but the most important ones
+
+are going to be around setting up rules
+
+and setting up event buses with resource policies.
+
+All right, that's it.
+
+I hope you liked it, and I will see you in the next lecture.
+
+# Amazon EventBridge - Multi-Account Aggregation.
+
+So just a short lecture explaining
+
+how to do multi-account event aggregation with EventBridge.
+
+So say for example that you have multiple accounts in AWS
+
+but you wanted to centrally manage some of these events
+
+in a central account event bus.
+
+And say you're launching EC2 instances
+
+in all your accounts and you want to actually catch
+
+these events in the central account.
+
+So how would you do this?
+
+Well, you would define an event pattern
+
+in one of your accounts and then you would create
+
+an event rule for it, so that all the state changes
+
+of account A are sent to the event rule.
+
+And it turns out that the targets of an event rule
+
+in one account can be an event bus in another account.
+
+So, to make it work, so that the account A
+
+can send into the central accounts,
+
+we need to create a resource policy on the event bus
+
+of the central account to accept events from other accounts.
+
+So that makes sense?
+
+Then we can do the exact same pattern
+
+in account B and D and C,
+
+so that we have all the events and all the state changes
+
+of our EC2 instances that will land onto the event bus
+
+of the central accounts.
+
+From there, we can just create the own event rule
+
+on the event bus, for example to trigger SNS notifications,
+
+or lender functions, or whatever you want.
+
+So that's it, just one thing to know
+
+in terms of architecture,
+
+I hope you liked it and I will see you in the next lecture.

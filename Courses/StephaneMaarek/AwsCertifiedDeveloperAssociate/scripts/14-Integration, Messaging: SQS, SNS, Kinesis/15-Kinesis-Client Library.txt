@@ -1,0 +1,161 @@
+Now let's discuss Kinesis Client Library.
+
+So it is something that the exam can ask you
+
+one scenario question about,
+
+so let's go over how it works in the scenario question.
+
+So this is a Java library that helps you read records
+
+from Kinesis Data Stream with distributed applications
+
+that we'll be sharing the read workload.
+
+And each shard is to be read by only KCL instance,
+
+that means that if you have 4 shards,
+
+you get a maximum of 4 KCL instances.
+
+If you have 6 shards, you get a maximum of 6 KCL instances.
+
+And if I just say, you're good to go for the exam,
+
+but I want you to explain exactly how it works,
+
+so you can get an idea about
+
+how the Kinesis Client Library works.
+
+So, the Kinesis Client Library will be reading
+
+from our Kinesis Data Stream
+
+and the progress of how far it's been reading
+
+is going to be checkpointed into DynamoDB,
+
+and so your application running KCL
+
+will need IAM access to DynamoDB.
+
+It will be able, thanks to DynamoDB
+
+to track the other workers of your KCL application
+
+and share the work among shards.
+
+KCL can run on anything you want
+
+but you can be running on EC2 instances,
+
+with an EC2 instance role,
+
+you're Elastic Beanstalk application,
+
+or on-premises servers,
+
+as long as they have correct IAM credentials.
+
+The records are going to be read in order
+
+and at the shard level obviously,
+
+and there are two versions of the Kinesis Client Library,
+
+Version 1, supports only shared consumer
+
+and version two of KCL,
+
+supports both shared and enhance fan-out consumer remotes.
+
+So, if we look at an example of 4 shards into our stream,
+
+we can have a DynamoDB table to check on the progress,
+
+and so we can run two KCL apps
+
+of the same coherent application
+
+running on two different EC2 instances.
+
+in this case, thanks to DynamoDB,
+
+they will know how to share the work,
+
+so the first KCl app is going to be reading
+
+from shard 1 and 2,
+
+and the second KCL app is going to be reading
+
+from shard 3 and 4.
+
+Now, the progress of how far
+
+the app has been reading into the Kinesis Data Stream
+
+will be checkpointed into DynamoDB.
+
+And so, for example, if one of these application goes down,
+
+DynamoDB and KCL apps working together,
+
+will know that an app will go down,
+
+and so reading from the other shards will be resumed
+
+from where it was checkpointed.
+
+It works also when you scale up,
+
+so if you have 4 shards
+
+and now you run 4 KCL applications,
+
+then it will be each reading from one shard.
+
+And therefore the progress will be resumed from DynamoDB
+
+and checkpointed again.
+
+So as you can see how this works, right?
+
+But we can not have more KCL apps than shards,
+
+because well, otherwise one will be doing nothing.
+
+So if you want to read to scale Kinesis,
+
+you can scale Kinesis and add 6 shards,
+
+so now we still have our 4 KCL applications,
+
+but now we have six shards in Kinesis in the streams.
+
+And so again, they will detect this change,
+
+and working together with DynamoDB,
+
+they will again, split the work
+
+between each KCL application and the shard assignments.
+
+So that means that once we have 6 shards
+
+Kinesis Data Stream
+
+then we can have 6 KCL applications reading from them,
+
+and checkpointing the progress into DynamoDB.
+
+If you've understood that,
+
+then you will be good to go for the exam
+
+to answer the question.
+
+That's it for this lecture, I hope you liked it,
+
+and I will see you in the next lecture.

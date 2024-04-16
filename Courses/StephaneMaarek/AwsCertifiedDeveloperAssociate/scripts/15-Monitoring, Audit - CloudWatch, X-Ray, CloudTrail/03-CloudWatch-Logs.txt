@@ -1,0 +1,955 @@
+So, now let's talk about CloudWatch Logs.
+
+So CloudWatch Logs is the perfect place
+
+to store your application logs in AWS.
+
+And to do so, you must first define log groups.
+
+They're whatever names you want,
+
+but usually they are representing one of your applications.
+
+Then within a log group, you will have multiple log streams,
+
+and they represent log instances within an application
+
+or specific log files or specific containers that you have
+
+as part of a cluster.
+
+Then you define your log expiration policy.
+
+So you can have the logs re being retained indefinitely
+
+to never expire, or you can choose to expire them
+
+from anywhere between one day to 10 years.
+
+It's also possible to send your CloudWatch Logs
+
+into various destinations.
+
+For example, to export them in batch into Amazon S3
+
+or to stream them into Kinesis Data Streams,
+
+Kinesis Data Firehose, AWS Lambda, Amazon OpenSearch.
+
+All the logs are encrypted by default,
+
+and you can set up your own KMS-based encryption
+
+with your own keys if you wanted to.
+
+So, now what kind of logs data goes into CloudWatch Logs?
+
+Now, what types of logs can go into CloudWatch Logs?
+
+Well, we can send the logs using the SDK
+
+or the CloudWatch Logs Agent
+
+or the CloudWatch Unified Agent.
+
+Now, the CloudWatch Unified Agents send logs to CloudWatch
+
+and so the CloudWatch Log Agent is now sort of deprecated.
+
+You have Elastic Beanstalk, which is used to collect logs
+
+from the application directly into CloudWatch.
+
+ECS will send the logs directly from the containers
+
+into CloudWatch.
+
+Lambda will send logs from the functions themselves.
+
+VPC Flow Logs will send logs specific
+
+to your VPC metadata network traffic.
+
+API Gateway will send all the requests made
+
+to the API Gateway into CloudWatch Logs.
+
+CloudTrail, you can send the logs directly
+
+based on the filter.
+
+And Route53 will log all the DNS queries made
+
+to its service.
+
+So, what if you wanted to query the logs in CloudWatch Logs?
+
+For this, you can use CloudWatch Logs Insights.
+
+So, it's a querying capability within CloudWatch Logs
+
+which allows you to write your query.
+
+You specify the timeframe you want to apply your query to
+
+and then automatically you're going to get a result
+
+as a visualization.
+
+And also, you can view the specific log lines
+
+that's made this visualization.
+
+This visualization can also be exported either
+
+as a result or added to a dashboard
+
+for being able to rerun it whenever you want.
+
+So this is very handy,
+
+and this will allow you to search and analyze log data
+
+within CloudWatch Logs.
+
+So there are lots of simple queries provided
+
+as part of the console for CloudWatch Logs Insights.
+
+For example, you can find the most 25 most recent events,
+
+or you can have a look
+
+at how many events had exceptions or errors in your logs,
+
+or you can look for a specific IP and so on.
+
+So, it provides a purpose-built query language.
+
+All the fields to allow you to build your queries
+
+are automatically detected from CloudWatch Logs,
+
+and then you can filter based on conditions.
+
+You can calculate aggregate statistics,
+
+you can sort events, limit the number of events, and so on.
+
+So as I said, you can save the queries
+
+and also add them to CloudWatch Dashboards.
+
+And you have the capability to query multiple log groups
+
+at a time, even if they are in different accounts.
+
+So remember, CloudWatch Logs Insights is a query engine,
+
+not a real-time engine.
+
+And so as such,
+
+it will only query historical data when you run the query.
+
+So as mentioned,
+
+CloudWatch Logs can be exported into several destinations.
+
+The first one is Amazon S3.
+
+So this is for a batch export to send all your logs
+
+into Amazon S3,
+
+and this export can take up to 12 hours to be completed.
+
+The API call to initiate this export is called
+
+CreateExportTask.
+
+So because this is a batch export,
+
+this is not real-time or near real-time.
+
+Instead, you must use the CloudWatch Logs subscription.
+
+So these allow you to get a real-time stream
+
+of these log events, and you can do processing and analysis.
+
+So, you can send this data into multiple places
+
+such as Kinesis Data Streams, Kinesis Data Firehose,
+
+or Lambda.
+
+And you can specify a subscription filter to say which kind
+
+of log events you want to be delivered to your destination.
+
+So, the subscription filter can send data
+
+into Kinesis Data Streams.
+
+This would be a great choice
+
+if you wanted to use, for example,
+
+the integration with Kinesis Data Firehose,
+
+Kinesis Data Analytics, or Amazon EC2, or Lambda.
+
+You can also directly send it into Kinesis Data Firehose.
+
+From there, you can send it in near real-time fashion
+
+into Amazon S3, or for example,
+
+the OpenSearch Service, or you have Lambda.
+
+So you can write your own custom Lambda function,
+
+or you can use a managed Lambda function that is
+
+sending data in real-time into the OpenSearch Service.
+
+On top of it, thanks to these subscription filters,
+
+it is possible for you to aggregate data
+
+from different CloudWatch Logs into different accounts
+
+and different regions into a common destination
+
+such as the Kinesis Data Stream in one specific accounts.
+
+And then Kinesis Data Firehose.
+
+And then in near real-time into Amazon S3.
+
+So that is very possible,
+
+and that is a way for you to perform log aggregation.
+
+So the nitty gritty of how this works is
+
+that you must use what's called destinations.
+
+So, let's say you have a sender account
+
+and the recipient accounts.
+
+So you create a CloudWatch Log subscription filter,
+
+and then this gets sent into a subscription destination,
+
+which is a virtual representant
+
+of the Kinesis Data Stream in the recipient accounts.
+
+Then you attach a destination access policy
+
+to allow the first account to actually send data
+
+into this destination.
+
+Then you create an IAM role in the recipient account,
+
+which has the permission to send records
+
+into your Kinesis Data Stream,
+
+and you make sure that this role can be assumed
+
+by the first account.
+
+And when you have all these things in place,
+
+then it is possible
+
+for you to send data from CloudWatch Logs
+
+in one account into a destination in another account.
+
+So that's it for this lecture.
+
+I hope you liked it, and I will see you in the next lecture.
+
+# CloudWatch Logs - Hands On.
+
+Okay, So I am in CloudWatch logs
+
+and we can see all the log groups we have right now.
+
+So as you can see,
+
+we have eight of them and they were created
+
+by some services.
+
+For example, this one was created by Lambda.
+
+This one was created by datasync.
+
+This one was created by glue
+
+and this one was created by us
+
+when we did do an SSM runCommand
+
+and we wanted the output to be populated in this log group.
+
+So, if we take a look at this example, for example,
+
+we have six log streams
+
+and so each of them represents a different instance
+
+that we did run a specific run command on.
+
+So, this is the same runcommond ID across the six.
+
+Here, we have a different instance ID for each of the six,
+
+so two and two and then we have,
+
+stdout and stderr.
+
+So if you look at stdout,
+
+we can look at all the logs that was generated
+
+by this command
+
+and we can have a look at all the log lines and so on.
+
+So this is quite (indistinct).
+
+And the idea is that,
+
+from the log for example,
+
+you can look through the keyword http
+
+and it would show you all the log lines
+
+that contain the word htp.
+
+If you just look for the word installing, for example,
+
+it will show you just maybe two or three log lines
+
+that contain the word installing.
+
+So that's certainly (indistinct).
+
+And so we have, for stdout, stderr,
+
+so we can see really the idea behind different log streams.
+
+Now, we can create metric filters in here,
+
+and these metric filters
+
+is a way for us to find a filter pattern.
+
+For example, installing.
+
+Okay,
+
+And then we need to select for example,
+
+a custom data, for example, this log stream
+
+and then we test a pattern and it's going to give us
+
+three matches out of five in the simple logs.
+
+Now, if you went ahead with entering this filter name,
+
+as we can see,
+
+it could call it DemoFilter
+
+and DemometricFilter.
+
+And this is a new namespace, okay.
+
+And here is DemoMetric.
+
+So this is DemoMetric filter namespace,
+
+and this is a DemometricFilter.
+
+And then, the metric value, okay.
+
+When there is a filter pattern or matching occur
+
+and so, you can say one for example,
+
+to add one and to count how many times
+
+this installing lines have been filmed.
+
+And the default value and the unit if you want it to,
+
+then click on next, create
+
+and this will give you a new metrics
+
+so, if you went into CloudWatch metric right here
+
+and we're going to clear this graph
+
+and we're going to find a new metrics.
+
+So let's refresh this page.
+
+Maybe this is going to help us.
+
+Okay, so if we go to all new spaces,
+
+as soon as this metric filter would appear,
+
+it would appear right here and we could visualize it.
+
+But currently, because we don't send any log output,
+
+then we don't see it.
+
+But the idea is that,
+
+we could create an alarm on top of this metric filter
+
+So we can click on create alarm.
+
+and this would allow us to create
+
+an alarm in case,
+
+for example, a metric went over a specific value
+
+and again, this metric is calculated based on the filter
+
+from the log streams.
+
+We could also create subscription filters.
+
+So as you can see here,
+
+we can create a filter for different outcomes.
+
+So Elasticsearch, Kinesis, datastreams,
+
+Kinesis Firehose or a Lambda subscription filter
+
+if you want to send data into custom lambda functions.
+
+And, we can create up to two subscription filters
+
+per log group according to this, okay.
+
+Now, we can also edit the retention settings.
+
+So, we can see that the logs can never expire
+
+all the way up to 120 months.
+
+Okay, so 10 years.
+
+And then, we can also export the data into Amazon S3.
+
+So you can click on export data
+
+You can choose a range of data to export
+
+and then, the stream prefix,
+
+if you wanted to just get specific log streams,
+
+and then the S3 buckets and the bucket prefix,
+
+and you'd be good to go.
+
+And the finally,
+
+in here, you can create a log group
+
+(indistinct) demo-log-group.
+
+Okay, you can set up the retention settings.
+
+KMS key, if you wanted to encrypt that log group
+
+and then click on create.
+
+And so, the encryption setting would appear then here,
+
+if a KMS key ID was specified.
+
+Okay and then finally,
+
+CloudWatch Logs Insights,
+
+is allowing you to use a nice query language
+
+to query some specific log groups.
+
+So for example, we can create this one
+
+and run the query.
+
+And then, this is not going to give us any data
+
+because we're looking for data from the past hour.
+
+But if we look at data from the past 60 days
+
+and run this query, maybe we'll find something.
+
+So you can see, we found
+
+18 records from this query.
+
+And so, this gives us a nice query language
+
+to start gaining some insights on top of our logs.
+
+And on top of it,
+
+you can export the results if you want it to.
+
+And on the right hand side,
+
+you can see that you can save your queries. Okay?
+
+So you can query and save them here.
+
+Or, you can look at some simple queries
+
+and view the use cases of losing log insights for example,
+
+view the latency statistics
+
+for a five minute interval on Lambda,
+
+or get the top 10 by transfers
+
+by source and destination IP addresses for VPC flow logs.
+
+So it gives you,
+
+for example, if you should click on these,
+
+some nice insights to how the query language works
+
+for CloudWatch logs insights.
+
+So this is CloudWatch logs.
+
+I hope you liked it
+
+and I will see you in the next lecture.
+
+# CloudWatch Logs - Live Tail - Hands On.
+
+So I want to show you
+
+a really cool CloudWatch logs feature called Live Tail.
+
+So first let's create a log group
+
+and I'll call this one demo log group
+
+and then create it.
+
+We click on it and then we're going
+
+to create a log stream called DemoLogStream.
+
+Let's create it and click on it
+
+and then we are in it.
+
+So we can start tailing.
+
+Here's the button start tailing and what this means,
+
+and I will just keep the other one open in the back page.
+
+So we have access to here our log stream,
+
+and here we clicked on Live Tail
+
+and we are in the Live Tail setting.
+
+So here this is a Live Tail UI
+
+and we have filtered on a specific demo log group
+
+and then demo log stream as a log stream.
+
+This is optional.
+
+You can choose to specify or not a log stream.
+
+Then you apply your filter
+
+and this is going to wait for log events
+
+that match your filter.
+
+So that means that as events are being posted
+
+into Cloudwatch logs,
+
+they are going to appear here in our Live Tail,
+
+which could be very helpful for your debugging needs.
+
+So let's do an example.
+
+So we're going to go into our
+
+demo log stream again, in here,
+
+and under actions we're going to create a log event
+
+and we'll have hello world
+
+so we can create a log event and post it.
+
+So now hello world has been posted
+
+and if you go into your Live Tail,
+
+as you can see it has appeared.
+
+So this is quite a nice way
+
+because if you have log streaming very fast,
+
+it can all appear here.
+
+And then from this we can get more information
+
+around when this happened, the group and so on.
+
+And then we can click here
+
+to get a link into the direct log stream it happened into.
+
+So it's just a very cool,
+
+very easy feature to debug your CloudWatch logs.
+
+And from a pricing perspective,
+
+you only get a few hours a day,
+
+so maybe one hour a day of free usage of Live Tail.
+
+So please make sure to cancel
+
+and close your lifestyle session
+
+so that you don't have any cost,
+
+but you have one hour of free every day.
+
+So this is quite nice.
+
+Alright, so that's it for this lecture.
+
+I hope you liked it
+
+and I will see you in the next lecture.
+
+# CloudWatch Logs - Metric Filters.
+
+So, now let's talk about
+
+CloudWatch Logs metric filter.
+
+So, the idea is that you can have filter expressions
+
+on your logs, for example,
+
+to find a specific IP inside of a log
+
+or to count the number of occurrences
+
+of the word error in your logs.
+
+And then you can make a metric out of it.
+
+And so it's called a metric filter.
+
+And this metric filter can be used to trigger an alarm.
+
+So, one thing you should know
+
+is that when you create a filter,
+
+it does not retroactively filter data.
+
+So, the metric data is only going to be pushed
+
+for events that happen after the filter was created.
+
+On top of it,
+
+you can specify up to three dimensions
+
+for the metric filter
+
+to create a very interesting metric.
+
+So, let's take an example.
+
+We have CloudWatch Logs agent
+
+installed on an EC2 instance,
+
+which is streaming the logs into CloudWatch Logs.
+
+Then an actual metric is going to be created out of it.
+
+This is your metric filter.
+
+So, we'll have a real CloudWatch metric
+
+based on the filter expression we have selected.
+
+From there, we can, for example,
+
+integrate it with a CloudWatch alarm to say that,
+
+"Hey, if we count five times error
+
+"in less than a minute in your logs,
+
+"you may want to know about it
+
+"and be alerted in an SNS topic."
+
+So, that's it for metric filters.
+
+I hope you liked it.
+
+And I will see you in the next lecture.
+
+# CloudWatch Logs - Metric Filters Hands On.
+
+So I am in my CloudWatch logs
+
+and I want to take the Engine X access logs
+
+and I want to create a metric filter on these log streams.
+
+So what I'm going to be looking for is to see if somehow
+
+there is error code 400.
+
+So I will type 400 as in here,
+
+and we can see there's a lot of HTTP/1.11" 400 error codes.
+
+So I want to create a metric filter on those and be alerted.
+
+This is just a dummy use case.
+
+So I'm going to create a metric filter
+
+I can create from here, or I can go back
+
+and also go to metric filters in here and create one.
+
+So I'm going to create a metric filter
+
+and then you have to enter a pattern.
+
+Now, patterns can be quite complicated.
+
+There's a whole documentation on the filter
+
+and syntax for the pattern,
+
+but right now I'm just going to look for 400
+
+and make it extremely simple
+
+and then we can send custom log data to test
+
+or we can just get stuff directly from my logs
+
+and then test the pattern.
+
+And the result is that it found 14 matches out of 50 events
+
+in the sample logs.
+
+So that means that my pattern.
+
+Very, very simple, is working fine.
+
+Then I will scroll down and click on next
+
+and then I have to give a name to this metric filter.
+
+So I will say MetricFilter400Code.
+
+Okay, then we need to give a metric namespace.
+
+So I'll call it MetricFilters.
+
+And then a metric name, MyDemoFilter
+
+and then the metric value.
+
+So whenever a match occurs, so we can say, for example,
+
+publish the value number one, okay.
+
+And then the default value if no value is published,
+
+it's going to be zero.
+
+I click on next and I create this metric filter.
+
+So now this metric filter has been created
+
+and so if I go into my metrics in here, I'm able to see.
+
+So currently nothing has been published because as I said,
+
+the metric filter is not retroactive.
+
+So we need to make this metric filter work.
+
+And for this very simply,
+
+I'm gonna go into MyFirstBeanstalk environment
+
+and then I'm going to do an environment action
+
+and I'm going to restart the app servers
+
+and this should trigger a lot more logs to be written out
+
+into CloudWatch logs.
+
+So what I'll wait is just go back in here
+
+and I'll wait about five minutes
+
+for my environment to be rebuilt
+
+and hopefully the metric filter will start showing up
+
+in CloudWatch Metrics.
+
+So my environment has now been restarted
+
+and I'm going to go and open it up as well.
+
+And I'm going to do /test just to trigger something
+
+and we're good to go.
+
+Okay, so now let's go back into CloudWatch,
+
+and I'm going to refresh this and hopefully very, very soon
+
+we should start seeing some metrics.
+
+Okay, so I have now refreshed my CloudWatch metrics page
+
+and thankfully what we start seeing is a custom namespace
+
+called MetricFilters.
+
+That was the one we created.
+
+And then we create this metric, and this is my demo filter.
+
+Now, it's not very interesting as a metric
+
+because the value is zero right now
+
+so that means we haven't detected any 400 events.
+
+But what I wanna show you is that they didn't backfill
+
+the data for previous events.
+
+So metric filters only added data
+
+as soon as they're created.
+
+So it's not very interesting in this graph, but that's okay.
+
+Another thing we can do with this metric filter
+
+is to click on it and then create an alarm
+
+and so by creating a CloudWatch alarm,
+
+we can do some automation.
+
+So I'm just going to create a dummy CloudWatch alarm.
+
+So I will use MyDemoFilter.
+
+Currently there's nothing, but I can say, okay,
+
+if as a static threshold you are greater
+
+than I would say 50, then something is really,
+
+really wrong with my web application
+
+and therefore I'm going to click on next
+
+and I'm gonna say, okay, the alarm should be in alarm
+
+and I'm going to send my alarm to an existing SMS topic.
+
+Maybe this one, may be another one.
+
+And then I can say next and say DemoMetricFilterAlarm.
+
+And that's it.
+
+So now we have created a CloudWatch alarm
+
+on top of our metric filter coming from CloudWatch log.
+
+So you can see there's a lot of different
+
+CloudWatch services coming together
+
+in this example and create the alarm
+
+and now have the basis for my notifications.
+
+Obviously this won't happen right now,
+
+I won't get any notification, but you get the general idea
+
+and this is how you would go ahead
+
+and create your own metric filters.
+
+And so if I refresh this now, this page,
+
+what I should be seeing is on the bottom,
+
+that yes, this metric filter is linked
+
+to an alarm called DemoMetricFilterAlarm.
+
+So this is great.
+
+I hope you liked it, and I will see you in the next lecture.
