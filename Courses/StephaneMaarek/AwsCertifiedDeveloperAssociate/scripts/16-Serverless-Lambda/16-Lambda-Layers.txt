@@ -1,0 +1,239 @@
+Okay, so now let's talk about Lambda Layers.
+
+They're a newer feature of Lambda,
+
+and they allow us to do two things.
+
+Number one is to create custom run times for Lambda.
+
+So that means languages that are not meant
+
+for Lambda initially,
+
+but that the community has decided to support
+
+through Lambda Layers.
+
+So we have C++, and we have Rust, for example.
+
+So these are two examples that allow you
+
+to use a C++ language or the Rust language
+
+onto Lambda functions.
+
+The other more common use case for Lambda Layers
+
+is to externalize dependencies in order to reuse them.
+
+So, if we look at a zipped application package,
+
+it could be pretty big, we have a Lambda function
+
+and there'd be some heavy libraries, heavy dependencies.
+
+And so that's maybe 30 megabytes.
+
+And we saw that to update another function,
+
+we need to re-upload that zip over and over and over again.
+
+So that would mean that every time
+
+we repack your application and re-upload everything,
+
+but sometimes the dependencies we're using are not changing
+
+or are changing very, very, very slowly.
+
+And so it would be better to externalize them
+
+into what's called a layer.
+
+So the goal is to have your application package
+
+which is what you could change very,
+
+very often your code externalize.
+
+So this has maybe 20 kilobytes, so very, very small.
+
+And then you have created layers for your heavy libraries.
+
+So you've created a first and then the layer of 10 megabyte
+
+the second limited layer of 30 megabytes
+
+and these layers together can be referencing your function
+
+and sorry your functioning can be referencing your layers,
+
+obviously, and therefore we have a much faster way to
+
+deploy our functions
+
+and we don't need to repackage every time our dependencies
+
+and because our layers are externalized, another function
+
+another application package could create another function
+
+maybe 60 kilobytes and reference these, same layers.
+
+So this the whole purpose
+
+we are packaging our application dependencies and layers
+
+and we can reuse them across Lynda functions.
+
+Now let's go in the hands-on to see how that works.
+
+Okay, so let's practice Lambda layers.
+
+And for this, we'll be following a tutorial by AWS.
+
+So let's call a function, Lambda layer demo
+
+and the runtime is going to be Python 3.8,
+
+and we'll create this function.
+
+So we're going to use a layer provided by AWS
+
+because it is very complicated for us to create a layer
+
+and I just wanna show you how layers work.
+
+So for this, let's just go on Google and type,
+
+"AWS blog Lambda Layer Scipy, S-C-I-P-Y."
+
+So we get a New for Lambda Any Programming Language
+
+and share common components.
+
+So this is the blog we're looking for,
+
+and we'll scroll down,
+
+and we want to find the code right here,
+
+the Python code that we'll need.
+
+Okay. So let's go into our Lambda function.
+
+And as we can see in here
+
+the Lambda layer demo has currently zero layers.
+
+So if you click on layers
+
+it takes you to the bottom of your page.
+
+And here we can add a layer.
+
+So we can get different types of layers.
+
+We can get AWS layers or custom layers or specify an ARN.
+
+So we'll choose AWS Layers
+
+because we haven't created a layer yet.
+
+And in here you choose AWS Lambda Python 3.8 SciPy 1x.
+
+And then in terms of version
+
+just choose the latest version available to us.
+
+So this means that this is a layer
+
+that has the SciPy Library already compiled
+
+for Python 3.8 available for Lambda functions.
+
+So we'll click on add, and thanks to this,
+
+then we can use code that references the site by library
+
+without us attacking the dependencies of that function.
+
+So let's take our Python code in here
+
+and copy it entirely and then paste it within this window.
+
+So we can see the first two lines is import numpy as np,
+
+and imports a site by spatial and this function right here.
+
+So this means that these things are being imported.
+
+And when you have imports
+
+on stuff that Lambda function do not know
+
+usually you have to pack it with dependencies
+
+just the way we did it for node.JS and NPM.
+
+Okay. But it turns out that thanks to the layer
+
+the dependencies are actually available
+
+to our Lambda function, but we didn't have to pack them
+
+as dependencies from moving in our code,
+
+which is quite cool.
+
+So this is the whole power of layers.
+
+So let's deploy this function
+
+and let's make sure that it is indeed working
+
+and that we can leverage these libraries.
+
+So let's go into the test tab.
+
+We'll just call this one Simple Events
+
+and then click on tests.
+
+Now the function is executing
+
+and we get some information around the log outputs.
+
+So it is using numpy.
+
+It is creating some matrix
+
+and some other matrix, doing some computation,
+
+and then computing some random points
+
+and finding the smallest sets, containing all points.
+
+So nothing important about what this function does.
+
+But the important part to remember is that the code itself
+
+of the function was using a library here.
+
+And that library came
+
+from the Lambda layer we had added from before.
+
+So there's a whole power of Lambda layers, very quick demo
+
+but hopefully it shows you the idea
+
+of what you can build
+
+and the optimization you can have
+
+within your Lambda functions using layers.
+
+I hope you liked it.
+
+And I will see you in the next lecture.

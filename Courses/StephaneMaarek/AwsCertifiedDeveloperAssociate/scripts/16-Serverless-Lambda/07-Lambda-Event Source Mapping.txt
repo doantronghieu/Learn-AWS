@@ -1,0 +1,737 @@
+So we have seen asynchronous processing,
+
+we have seen synchronous processing,
+
+and now we are going to see Event Source Mapping.
+
+So this is the last category of how Lambda
+
+can process events in AWS.
+
+So it applies to Kinesis Data Streams,
+
+SQS and SQS FIFO queue and DynamoDB Streams.
+
+So the common denominator of all of these things together
+
+is that records need to be polled from the source.
+
+So Lambda needs to ask the service to get some records
+
+and then the records will be returned.
+
+So that means that Lambda needs to poll from these services.
+
+So in this case the Lambda function
+
+is invoked synchronously.
+
+So let's see this,
+
+We have Kinesis and the Lambda service,
+
+and if we configure Lambda to read from Kinesis,
+
+then they will be internally
+
+an Event Source Mapping that will be created.
+
+And that is responsible for polling Kinesis,
+
+and returning and getting the results back from Kinesis.
+
+So Kinesis will return a batch to us.
+
+And then once this Event Source Mapping
+
+has some data for Lambda to process,
+
+it's going to invoke our Lambda function synchronously,
+
+with an event batch.
+
+So at its core, this is how it works.
+
+So there are two categories of Event Source Mapper.
+
+The first one is streams and the second one is queues.
+
+So let's deal with streams,
+
+and streams apply to Kinesis Data Streams
+
+and DynamoDB Streams,
+
+and we'll see what DynamoDB Streams are
+
+very, very soon.
+
+So in case of streams, they will be an Event Source Mapping.
+
+They will create an iterator for each shard,
+
+so each Kinesis shard or DynamoDB Stream shard.
+
+And the items will be processed in order at the shard level.
+
+And so we can configure where to start to read from.
+
+You can read it with just the new items,
+
+or from the beginning of the shard
+
+or from a specific timestamp.
+
+Whenever an item is processed from a shard,
+
+whether it be from Kinesis or DynamoDB,
+
+they are not removed from the streams.
+
+That means that other consumers can read the data
+
+in Kinesis or DynamoDB,
+
+which is how they work in the first place.
+
+But I just wanted to reemphasize this.
+
+So the use case for this
+
+is either low traffic or high traffic.
+
+So if you have a low traffic stream,
+
+you can use a batch window to accumulate records
+
+before processing.
+
+So to make sure that
+
+you invoke another function efficiently.
+
+And then if you have a very high throughput stream
+
+and you want to speed up processing,
+
+you can set up Lambda to process multiple batches
+
+in parallel at the shard level.
+
+So here's a diagram from AWS blog.
+
+And so we have a shard and there's a record processor and
+
+there's a way to have a parallelism
+
+to have multiple Lambda functions process the batch
+
+within the same shard.
+
+So you can have up to 10 batch processors per shard.
+
+And for each batch they will be in-order processing,
+
+at the partition key level.
+
+So if you specify a partition key,
+
+it will not be read in order entirely for the shard.
+
+But each key within the shard will be read in order.
+
+So this is how we can parallelize the processing
+
+for Lambda function and your streams.
+
+What about errors?
+
+By default, if your function returns an error,
+
+the entire batch is going to be reprocessed
+
+until the function succeeds
+
+or the items in the batch expire.
+
+So this is very important.
+
+Having an error in a batch can block your processing.
+
+So to ensure in-order processing,
+
+processing for the affected shard is paused
+
+until the error is resolved.
+
+And so you can manage that in several ways.
+
+You can configure the event source mapping
+
+to number one, discard old events.
+
+or restrict the number of retries
+
+or split the batch on errors.
+
+This case, this is around Lambda timeout issue.
+
+So if your Lambda function doesn't have enough time
+
+to process the entire batch,
+
+maybe you will have enough time to process half the batch.
+
+And then in case you want to discard old events,
+
+all the events can go to a destination.
+
+And we'll see destinations in the next lectures.
+
+So this is all about streams.
+
+Now you need to know about queues.
+
+So for the queues, it's for SQS and SQS FIFO.
+
+And so you have the same idea.
+
+The SQS queue will be polled
+
+by a Lambda Event Source Mapping.
+
+And then whenever a batch is returned,
+
+your Lambda function will be invoked synchronously
+
+with the event batch.
+
+So in the case of SQS,
+
+the Event Source Mapping will poll SQS
+
+using Long Polling.
+
+So it's going to be efficient.
+
+And we can specify the batch size
+
+from one to 10 messages.
+
+And here is the configuration.
+
+So just the batch size and the SQS queue.
+
+Then there's some recommendations
+
+from the websites of AWS,
+
+which is to set the queue visibility timeouts
+
+to six times the time out of your Lambda function,
+
+which is configurable.
+
+And then if you want to use a DLQ,
+
+so if you want to make sure that
+
+if there's a problem reading or processing a message
+
+in SQS, it goes to dead-letter queue,
+
+then you set up the DLQ on the SQS queue,
+
+not on Lambda.
+
+So we'd set up a DLQ on SQS
+
+but not on Lambda. Why?
+
+Because the DLQ for Lambda
+
+only works for asynchronous invocations.
+
+And this is a synchronous invocations.
+
+Or as we'll see, we can also use
+
+a Lambda destination for failures.
+
+And this is going to be seen in the next lectures.
+
+So now the bates of information on queues and Lambda,
+
+and I'm sorry this is quite boring but I have to say it.
+
+So Lambda supports in-order processing,
+
+if you have a FIFO queue, so First-In, First-Out.
+
+And the number of Lambda functions
+
+that will be scaling to process your queue
+
+will be equal to the number of active message groups.
+
+So this is the group ID setting.
+
+If you use a standard queue,
+
+then the items will not be processed in order.
+
+And for a standard queue, Lambda will scale
+
+as fast as possible to read all the messages
+
+in your standard queue.
+
+If there is an error happening in your queue,
+
+then the batches are going to be returned
+
+to the queue as individual items
+
+and might be processed in a different grouping
+
+than the original batch.
+
+Occasionally, the Events Source Mapping
+
+might receive the same item twice from the queue,
+
+even if no function error occurred.
+
+So you need to make sure
+
+to have item potent processing
+
+for Lambda function in case that happens.
+
+Finally, when they're processed by Lambda,
+
+Lambda will delete the items from the queue,
+
+and then they will never be seen again.
+
+And finally, as I said,
+
+you can configure the source queue to send the items
+
+to a dead-letter queue if they can't be processed.
+
+So hopefully all of this makes sense.
+
+We'll see in the hands on how we can set it up.
+
+And so what about the scaling?
+
+So I already said it,
+
+but we can go again to summarize the scaling
+
+for the Event Mapper.
+
+So for Kinesis Data Streams and DynamoDB Streams,
+
+you get one Lambda invocation per stream shard.
+
+Or if you use parallelization,
+
+you can have up to 10 batches processed
+
+per shard simultaneously.
+
+And for SQS Standard,
+
+I said Lambda will scale up pretty quickly.
+
+So yes it does.
+
+It adds 16 more instances per minute to scale up.
+
+So it's pretty quick.
+
+And then the maximum amount of batches per second
+
+processed simultaneously, is 1000.
+
+For SQS FIFO, it's a bit different.
+
+So the messaging with the same group ID
+
+will be processed in order no matter what.
+
+And the Lambda function will scale up
+
+to the number of active message groups.
+
+Again, they're defined by the group ID.
+
+So that's all for Lambda Events Mapping Sourcing,
+
+and I know this is a pretty long boring theory lecture.
+
+It will make a lot of sense in the next lecture
+
+when we do the hands on,
+
+but we had to go over it
+
+and I would recommend you look again
+
+at this lecture before your exam
+
+because it's possible the exam will ask you
+
+some pretty pointy details about Event Mappers.
+
+All right, that's it. I will see you in the next lecture.
+
+# Lambda Event Source Mapping Hands On (SQS).
+
+Okay, so now let's practice event mappers
+
+and for this we'll just author a new function from scratch
+
+and the invent mapper we'll be using is SQS
+
+so I will name my function lambda-SQS, python 3.8
+
+and I will go ahead and create my function.
+
+Also, we need to create an SQS queue for this
+
+for my lambda function to be able to retrieve
+
+the messages from our SQS queue.
+
+So I'm just gonna to create a queue
+
+and I will name my queue lambda-demo-SQS.
+
+Okay. So this is a standard queue
+
+and I will just scroll all the way down
+
+and create this queue.
+
+Okay. So my queue is created
+
+and my lambda function is created as well
+
+so now for my lambda function to
+
+retrieve messages from our SQS queue,
+
+what I need to do is to click on add trigger.
+
+So add a trigger and here we have
+
+all the options of triggers within,
+
+for our lambda function so as you can see,
+
+there's a lot of AWS type of integrations,
+
+but also some partner events sources
+
+that you can get directly into your lambda function,
+
+but so for this example,
+
+what I'm going to do is go into SQS,
+
+which happens to be right here.
+
+Okay. So we need to choose an SQS queue
+
+so I will choose the lambda-demo-SQS
+
+and next we have to specify the batch size.
+
+So how many messages we want to
+
+receive as part of a single batch.
+
+And you can go anywhere from one message,
+
+all the way up to maybe a bigger batch size.
+
+Okay? And you need to look into the documentation
+
+to see what is the biggest batch size.
+
+I thought it used to be 10,
+
+but now I guess it is longer.
+
+So then the batch windows so how long to
+
+gather records before invoking the functions
+
+in seconds so this is to be more efficient
+
+and invoke the function less while having
+
+a bigger batch for your lambda function to process.
+
+And finally, you need to make sure to enable the trigger.
+
+So I will enable this trigger and click on add.
+
+Now we're going to get an error saying that
+
+the execution role does not have the permissions
+
+to call ReceiveMessage on SQS.
+
+So yes, because our lambda function
+
+is reading from the SQS queue
+
+and there is a IAM role attached to the lambda function,
+
+then we need to make sure that it is properly configured
+
+and has the permission to read it from SQS.
+
+So fairly easy. Let's go back to our lambda SQS function.
+
+We're going to configuration, permissions
+
+and here is the role name.
+
+So we're going to click on this role,
+
+which is going to take us into the IAM console
+
+and I can attach a policy to my role
+
+and I will just type Lambda SQS
+
+and there should be a role for that.
+
+So let's just type SQS then
+
+and we have an AWS Lambda SQS queue execution role.
+
+And this role is enough for it
+
+to read it from the SQS queue.
+
+So attached to this policy,
+
+this Lambda SQS queue execution role
+
+and if I go back into my Lambda trigger and add again,
+
+this time it works because we have the permission.
+
+So as we can see now, SQS of the Lambda
+
+function is linked to my SQS queue.
+
+Okay so now in terms of what the code of
+
+my Lambda function will be doing,
+
+it's going to learn the function
+
+and we're just going to print the events
+
+yet again to get some information.
+
+And instead of returning this, let's just return success.
+
+Okay, let's deploy our changes.
+
+Perfect. This is good.
+
+And now let's test our Lambda function
+
+by simply going into SQS and sending a message.
+
+So in my SQS queue I'm going to send a message.
+
+The message body is going to be hello world
+
+and then we can add some message attributes
+
+for example, the foo is going to be of value bar.
+
+Just to try it out.
+
+Then we're going to send it this message
+
+so now the message is sent and is ready to be received.
+
+And so, because my Lambda function is
+
+continuously pulling from SQS,
+
+then it should process this message.
+
+And how do we make sure?
+
+Well we are logging the events right here
+
+by going into the console logs.
+
+So if we go into monitoring and again
+
+we open the logs in CloudWatch,
+
+now we see one log stream
+
+so this is perfect let's click on it
+
+and we do have a request in here indeed.
+
+So we have a look at everything.
+
+and as we can see, the body is hello world
+
+as well as the message attributes contains
+
+foo bar in terms of attributes.
+
+We get some information around when it was sent,
+
+the event source being SQS and so on.
+
+So that means that the invocation was working.
+
+And also, well, if we go back to SQS into our queue
+
+and go into send and receive messages,
+
+as we can see there are zero
+
+messages available in our queue,
+
+well that's because the messages has been
+
+processed by our lambda function.
+
+So finally you need to make sure to
+
+disable this event mapper.
+
+So as we can see right now,
+
+it should be in the enabled state,
+
+but you need to disable it
+
+because if you don't disable it,
+
+then lambda is gonna be continuously
+
+pulling from your SQS queue,
+
+which can incur some costs in the long run
+
+or count against your frequent out for SQS pulse.
+
+So let's just disabled SQS queue,
+
+but let's go ahead and add another trigger.
+
+I just wanna show you the Kinesis trigger
+
+because it is another event mapper
+
+and I want to show you the different options
+
+that are available when you use Kinesis to get lambda.
+
+So Kinesis stream, you need to choose obviously
+
+Kinesis stream to listen for updates on.
+
+Then consumer, so this is if you have a enhance final
+
+consumer then you can create a consumer application
+
+and enable the enhance on that consumer mode right here.
+
+But right now we have no so we'll be falling back
+
+to the standard way of consuming from Kinesis.
+
+Batch size, which is how many records
+
+should read at once so 100.
+
+Batch window again, if we want to have a bit
+
+of wait time to create a bigger batch
+
+before invoking our lender function.
+
+Starting position so do we want to read the latest data?
+
+Do we want to get the earliest data?
+
+Or do we want to get a specific timestamp
+
+to read from for our lambda function?
+
+And then you can see some additional
+
+settings such as on-failure destination
+
+to discard some data in case it cannot be read.
+
+How many retries, the maximum age of record,
+
+if you wanna split batch on error,
+
+how many concurrent batches per shard?
+
+So if you want to process the same shard concurrently
+
+and if you do so then you have more record processors,
+
+but Lambda will be ensuring the fact that there
+
+are still read in order at the partition key level.
+
+Tumbling window duration in case
+
+you want to do an aggregation
+
+and report batch item failures.
+
+So lots of options for Kinesis,
+
+you don't need to know them all for the exam,
+
+just need to know that Kinesis is an event
+
+source member for your lambda function
+
+and if you want to have more details into all these options,
+
+then the documentation is going to be your best friend.
+
+And then enable trigger if you're good,
+
+but let's just cancel this cause
+
+we just wanted to see the options.
+
+So that's it for this lecture.
+
+We've seen how event mappers work
+
+and we've seen how to add the missing
+
+item permissions for lambda functions to
+
+be able to read from our event mapper.
+
+So that's it, I hope you liked it
+
+and I will see you in the next lecture.

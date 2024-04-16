@@ -1,0 +1,511 @@
+# Overview.
+
+Now let's talk about CloudTrail.
+
+So CloudTrail is a way to get governance
+
+compliance and audit for your AWS Accounts.
+
+And CloudTrail is enabled by default.
+
+This will allow you to get a history of all the events
+
+and API Calls made within your AWS Accounts, by the console
+
+by the SDK, the CLI other services on AWS
+
+and all these logs will be appearing in CloudTrail.
+
+Now, what you can do is that you can also put these logs
+
+from CloudTrail into CloudWatch Logs or Amazon S3.
+
+And you can create a trail to be applied
+
+to all regions or a single region,
+
+if you wanted to accumulate all these history
+
+of events accumulated across all regions
+
+into one specific, for example, S3 buckets.
+
+And when we use CloudTrail, for example,
+
+we'll say someone went ahead and deleted something in AWS.
+
+For example, say that an EC2 instance
+
+was being terminated
+
+and you wanna figure out who did it?
+
+Well, the answer is to look into CloudTrail
+
+because CloudTrail will have that API Call
+
+in it and will be able to get
+
+to the bottom of it and understand who did what and when.
+
+So to summarize CloudTrail is in the middle
+
+and the actions of the SDK, the CLI, or the console
+
+or even IAM Users and IAM Roles
+
+or other services will be in the CloudTrail console.
+
+We can look in it to inspect and audit what happened.
+
+And if you want to have all the events for more
+
+than 90 days, then we can send them into CloudWatch Logs
+
+or we can send them into an S3 buckets.
+
+So let me dive a little bit deeper for CloudTrail.
+
+So we have three kinds
+
+of events that you can see in CloudTrail.
+
+The first one is called the Management Events
+
+and these represents operations that are performed
+
+on resources in your AWS Accounts.
+
+For example, whenever someone configures security,
+
+they will use the API Call called IAM AttachRolePolicy.
+
+And this will appear in CloudTrail.
+
+If you create a subnet, this will appear as well.
+
+If you set up logging, this will appear by default.
+
+Anything that modifies your resources
+
+or your iOS accounts will appear in CloudTrail.
+
+And by default,
+
+trails are configured to log Management Events
+
+no matter what.
+
+You can separate two kind of Management Events.
+
+You have the Read Events that don't modify resources.
+
+For example, someone is listing all the users
+
+in IAM or listing all the EC2 instances in EC2,
+
+these kind of things.
+
+You can separate them
+
+from Write Events that may modify resources.
+
+For example, someone deletes
+
+or tries to delete a DynamoDB table.
+
+And obviously the Write Events have probably
+
+a lot more importance
+
+because they can wreck damages into your AWS infrastructure.
+
+Whereas the Read Events is just to get information
+
+which are still very important, but maybe less destructive.
+
+Then you have Data Events.
+
+So they're separate and by default Data Events
+
+as are not logged because they're high volume operations.
+
+So what are Data Events?
+
+Well, you have Amazon S3 object level activity
+
+for example, GetObject, DeleteObject, PutObject.
+
+And as you can see,
+
+these can be happening a lot on an S3 bucket.
+
+And so this is why they're not logged by default
+
+and you have the option to separate again
+
+Read and Write Events.
+
+So a Read Event will be a GetObject
+
+whereas a Right Event would be a DeleteObject
+
+or a PutObject.
+
+Another kind of event you can have
+
+in a CloudTrail are AWS Lambda function
+
+execution activities.
+
+So whenever someone uses the Invoke API
+
+so you can get insights
+
+about how many times your Lambda functions are being evoked.
+
+And again, this could be really high volumes,
+
+if your Lambda functions are executed a lot.
+
+And the third kind of events
+
+in CloudTrail are called CloudTrail Insights Events.
+
+And so I will talk to you about CloudTrail Insights
+
+in a bit more details in the next slide.
+
+So now let's talk about CloudTrail Insights.
+
+So when we have so many Management Events across all types
+
+of services and so many APIs happening very quickly
+
+in your accounts,
+
+it can be quite difficult to understand what looks odd,
+
+what looks unusual and what doesn't.
+
+And so this is where CloudTrail Insights comes in.
+
+So with CloudTrail Insights and you have to enable it
+
+and you have to pay for it, it will analyze your events
+
+and try to detect unusual activity in your accounts.
+
+For example, in accurate resource provisioning,
+
+hitting service limits, burst of AWS IAM actions,
+
+gaps in periodic maintenance activity.
+
+So the way it works is that CloudTrail will analyze
+
+what normal management
+
+activities look like to create the baseline
+
+and then it will continuously analyze anything
+
+that is the right type of event.
+
+So whenever something is changed
+
+or try to be changed to detect unusual patterns.
+
+So very simply the Management Events are going
+
+to be continuously analyzed by CloudTrail Insights
+
+which will generate Insights Event
+
+in case something is detected.
+
+And so these anomalies, so these Insight Events will appear
+
+in the CloudTrail console.
+
+They will also be sent to Amazon industry if you want to,
+
+and an EventBridge Event.
+
+So in CloudWatch event is going to be generated
+
+in case you need to automate on top
+
+of these CloudTrail Insights, for example, to send an email.
+
+So this is the idea behind CloudTrail Insights.
+
+Finally, let's talk about CloudTrail Event Retention.
+
+So events by default are stored for 90 days in CloudTrail
+
+and then afterwards they're deleted,
+
+but sometimes you may want to have events for longer
+
+in case you want to go back to something that happened
+
+maybe a year ago for audited purposes.
+
+And so to keep events beyond this period,
+
+what you have to do is that you have to log them to S3.
+
+So send them to S3, and then you would use Athena
+
+to analyze them.
+
+So very simply all your Management Events, your Data Events
+
+and your Insights Events are going to go into CloudTrail
+
+for 90 days, retention period.
+
+And then you would log those into your S3 buckets
+
+for long-term retention.
+
+And when you're ready to analyze them,
+
+you would use the Athena service, which is a serverless
+
+service to query data in S3 to find the events
+
+Okay
+
+I hope you like this lecture, and I will see you in the next lecture.
+
+So let's have a look at CloudTrail.
+
+And CloudTrail is a service to intercept any API calls
+
+or user activity within your accounts.
+
+And so here on here on the left hand side panel,
+
+we can have a look at the event history
+
+and this is the event history
+
+for the last 90 days of management events.
+
+So you can see all the API calls that are being made
+
+over time in this account.
+
+So it doesn't have to be very interesting, okay,
+
+but all of them will be here.
+
+So what I wanna do for example, is that I want
+
+to look in my EC2 console, and I created a demo instance.
+
+And what I'm going to do is that I'm going
+
+to terminate this instance.
+
+So I do right click, terminate,
+
+and now the instance is being terminated.
+
+And what I'm going to do is I'm going to check whether
+
+or not this event happens and appears within CloudTrail.
+
+So I'm going to wait about five minutes and get back to you.
+
+And so I just refreshed my pages, and as you can see,
+
+I ran the terminate instances, API call.
+
+And we can see what's the event source.
+
+So it's EC2 from where it was done,
+
+the access key that was used,
+
+the region that was used, and so on.
+
+And we can get the whole event right here.
+
+So that's the full power of CloudTrail is
+
+that we can see all the events really happening
+
+from within CloudTrail directly in this UI.
+
+And this is a short introduction at the practitioner level,
+
+but this is enough for you to get started
+
+and to answer questions at the exam.
+
+So that's it.
+
+I hope you liked it.
+
+And I will see you in the next lecture.
+
+# CloudTrail - EventBridge Integration.
+
+A very important cultural integration
+
+you need to know about is the one with Amazon EventBridge
+
+to intercept any API calls.
+
+So let's say you wanted to receive an SNS notification,
+
+anytime a user would delete a table
+
+in DynamoDB by using the DeleteTable API Call.
+
+So what happens that whenever we do an API call in AWS,
+
+as you know, the API call itself is going
+
+to be logged in CloudTrail.
+
+That's for any API call.
+
+But then all these API calls will end up as events
+
+as well in Amazon EventBridge.
+
+And so we can look
+
+for that very specific delete table API call,
+
+and create a rule out of it.
+
+And this rule will have a destination
+
+the destination being Amazon SNS
+
+and therefore, we can create alerts.
+
+So let me give you a few more examples
+
+on how you can integrate Amazon Eventbridge and CloudTrail.
+
+For example, say, you wanted to be notified
+
+whenever a user was assuming a role in your accounts.
+
+So the AssumeRole is an API in the IAM service
+
+and therefore, is going to be logged by CloudTrail.
+
+And then using EventBridge integration,
+
+we can trigger a message into an SNS topic.
+
+Similarly, we can also intercept API calls that,
+
+for example, change the Security Group inbound rules.
+
+So the Security Group call
+
+is called AuthorizeSecurityGroupIngress,
+
+and it's an EC2 API call.
+
+So these are going to be logged again by CloudTrail
+
+and then they will appear in EventBridge
+
+and then we can trigger a notification in SNS.
+
+So as you can see, the possibilities are endless,
+
+but now you have a few ideas
+
+of how the integration can be leveraged.
+
+So I hope you liked it,
+
+and I will see you in the next lecture.
+
+# CloudTrail vs CloudWatch vs X-Ray.
+
+So this is something
+
+that may look obvious for you
+
+but what is the difference
+
+between CloudTrail, CloudWatch and X-Ray?
+
+I'll just try to summarize it in one slide.
+
+So CloudTrail is to audit API calls
+
+that are made in your account
+
+by user, services or even from the AWS console.
+
+It's really useful when you want
+
+to detect unauthorized calls
+
+or you wanna find the root cause
+
+of changes due to API calls.
+
+Now, CloudWatch is to use metrics for monitoring,
+
+so CloudWatch Metrics for monitoring
+
+and CloudWatch Logs for storing the application logs.
+
+CloudWatch Alarms to send notification
+
+in case of unexpected metrics, for example.
+
+And so all of this has to do with monitoring, okay?
+
+So CloudTrail is API calls,
+
+CloudWatch is going to be around monitoring.
+
+X-Ray is for automated trace analysis
+
+and central service map visualization
+
+so if you have a distributed service,
+
+this is a great way to look at things.
+
+And this is really helpful for debugging
+
+and also looking at stuff like latency,
+
+errors and fault analysis
+
+from within the X-Ray console.
+
+You can also get, as I said,
+
+request tracking across your distributed systems.
+
+So hopefully that makes it pretty clear
+
+which service is used for what.
+
+CloudWatch is really just for overall metrics,
+
+X-Ray is a lot more granular,
+
+trace-oriented type of service
+
+and CloudTrail is going to be for auditing API calls.
+
+Okay, hope that was helpful.
+
+I will see you in the next lecture.
